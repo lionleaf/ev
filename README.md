@@ -1,4 +1,5 @@
-#Build
+Build
+========
 
 Install cmake (at least version 3.1)
 Probably some opengl requirements too
