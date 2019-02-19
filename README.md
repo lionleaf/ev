@@ -1,13 +1,26 @@
+Requirements
+========
+Mac
+-------
+`brew install cmake`
+
 Build
 ========
 
 Install cmake (at least version 3.1)
-Probably some opengl requirements too
+Possibly some opengl requirements too
 
 ```
 mkdir build
 cd build
 cmake ..
+make
 ```
 
-And you can now build with `make` or open the generated files in Visual Studio (depending on your platform)
+For Windows you open the visual studio project files instead of running `make`
+
+To rebuild it all you need to do is
+`cd build`
+`make`
+
+
