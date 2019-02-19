@@ -24,7 +24,7 @@ void CheckOpenGLError(const char* stmt, const char* fname, int line)
 #endif
 
 const char* SHADER_VERTEX_SOURCE = R"raw(
-	#version 450 core
+	#version 410 core
 
 	layout (location = 0) in vec3 pos;
 
@@ -35,7 +35,7 @@ const char* SHADER_VERTEX_SOURCE = R"raw(
 )raw";
 
 const char* SHADER_FRAGMENT_SOURCE = R"raw(
-	#version 450 core
+	#version 410 core
 	out vec4 FragColor;
 
 	void main()
@@ -63,8 +63,9 @@ int main()
 	//GLFW init 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //Needed for Mac
 
 	//Window creation
 	GLFWwindow *window = glfwCreateWindow(800, 600, "EvoView", nullptr, nullptr);

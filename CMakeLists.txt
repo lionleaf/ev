@@ -6,8 +6,9 @@ endif()
 
 project(ev VERSION 0.1
            DESCRIPTION "Evolution"
-           LANGUAGES CXX)
+           LANGUAGES C CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
