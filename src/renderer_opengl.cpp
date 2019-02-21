@@ -151,6 +151,8 @@ void OpenGLRenderer::drawCircle(Circle circle)
     GL(glUseProgram(shaderProgram));
     GL(glBindVertexArray(vao));
     GL(glDrawArrays(GL_TRIANGLES, 0, 3));
+    GL(glDeleteVertexArrays(1, &vao));
+    GL(glDeleteBuffers(1, &vbo));
 }
 
 
