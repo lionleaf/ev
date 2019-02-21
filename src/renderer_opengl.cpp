@@ -1,6 +1,7 @@
 #include "renderer_opengl.h"
 #include <iostream>
 
+using namespace phys;
 void CheckOpenGLError(const char* stmt, const char* fname, int line)
 {
     GLenum err = glGetError();
@@ -112,23 +113,44 @@ void OpenGLRenderer::init() {
     GL( glEnableVertexAttribArray(0));
 } 
 
-void OpenGLRenderer::render() {
+void OpenGLRenderer::clear() {
     GL(glClearColor(0.4f, 0.2f, 0.4f, 1.0f));
     GL(glClear(GL_COLOR_BUFFER_BIT));
-
-    GL(glUseProgram(shaderProgram));
-    GL(glBindVertexArray(VAO));
-    GL(glDrawArrays(GL_TRIANGLES, 0, 3));
-
+}
+void OpenGLRenderer::finishRendering() {
 
     glfwPollEvents();
-
     glfwSwapBuffers(mWindow);
 }
 
 bool OpenGLRenderer::shouldClose() {
 
     return glfwWindowShouldClose(mWindow);
+}
+
+void OpenGLRenderer::drawCircle(Circle circle)
+{
+    float scale = 1 / 10.0f;
+    float vertices[] = {
+        (circle.pos.x - circle.radius) * scale, (circle.pos.y - circle.radius) * scale, 0.0f,
+        (circle.pos.x + circle.radius) * scale, (circle.pos.y - circle.radius) * scale , 0.0f,
+        (circle.pos.x                ) * scale, (circle.pos.y + circle.radius) * scale , 0.0f,
+    };
+
+    GLuint vao;
+    GL( glGenVertexArrays(1, &vao));
+    GL( glBindVertexArray(vao));
+
+    GLuint vbo;
+    GL( glGenBuffers(1, &vbo));
+    GL( glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    GL( glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+    GL( glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0));
+    GL( glEnableVertexAttribArray(0));
+
+    GL(glUseProgram(shaderProgram));
+    GL(glBindVertexArray(vao));
+    GL(glDrawArrays(GL_TRIANGLES, 0, 3));
 }
 
 
