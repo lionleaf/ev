@@ -7,10 +7,9 @@ class OpenGLRenderer {
 public:
     void init();
     void clear();
-    void finishRendering();
-    void render();
-    bool shouldClose();
     void drawCircle(phys::Circle circle);
+    void finishRendering();
+    bool shouldClose();
 private:
     GLFWwindow *mWindow;
     GLuint shaderProgram{};

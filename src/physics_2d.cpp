@@ -39,7 +39,6 @@ namespace phys {
         Vec2f normal = collisionNormal(A.circle, B.circle);
 
         float vel_along_normal = DotProduct(relative_velocity, normal);
-        std::cout << vel_along_normal;
 
         if (vel_along_normal > 0) {
             return; //Objects already moving apart
@@ -51,8 +50,8 @@ namespace phys {
         impulse_magnitude /= 1.0 / A.mass + 1.0 / B.mass;
 
         Vec2f impulse = impulse_magnitude * normal;
-        A.velocity =  A.velocity - 1.0 / A.mass * impulse;
-        B.velocity =  B.velocity - 1.0 / B.mass * impulse;
+        A.velocity =  A.velocity + (1.0 / A.mass) * impulse;
+        B.velocity =  B.velocity - (1.0 / B.mass) * impulse;
 
     }
 
@@ -71,7 +70,6 @@ namespace phys {
             for (int j = i + 1; j < m_objects.size(); j++){
                 PhysObject &obj_b = m_objects.at(j);
                 if (CirclevsCircle(obj_a.circle, obj_b.circle)) {
-                    std::cout << "Collision!";
                     ResolveCollision(obj_a, obj_b);
                 }
             }
