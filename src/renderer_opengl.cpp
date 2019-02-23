@@ -34,7 +34,9 @@ void OpenGLRenderer::init() {
 
 
     //Viewport setup
-    glViewport(0, 0, 800, 600);
+    int window_width, window_height;
+    glfwGetFramebufferSize(mWindow, &window_width, &window_height);
+    glViewport(0, 0, window_width, window_height);
     glfwSetFramebufferSizeCallback(mWindow, 
         [](GLFWwindow*, int width, int height)
         {
