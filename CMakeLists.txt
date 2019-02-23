@@ -17,4 +17,21 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/glfw-3.2.1)
 
-add_subdirectory(src)
+file(GLOB PROJECT_SHADERS shaders/*.vert
+                          shaders/*.frag)
+
+file(GLOB PROJECT_SOURCES src/main.cpp src/physics_2d.cpp src/renderer_opengl.cpp src/utils.cpp src/utils_opengl.cpp)
+file(GLOB PROJECT_HEADERS          src/physics_2d.h   src/renderer_opengl.h   src/utils.h   src/utils_opengl.h)
+
+source_group("Shaders" FILES ${PROJECT_SHADERS})
+
+add_executable(ev ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${PROJECT_SHADERS})
+
+file(COPY ${PROJECT_SHADERS} DESTINATION ${CMAKE_BINARY_DIR})
+
+target_link_libraries(ev PUBLIC glfw)
+target_link_libraries(ev PUBLIC glad)
+target_include_directories(ev PUBLIC extern/glad/include)
+
+
+add_executable(hello src/helloworld.cpp)
