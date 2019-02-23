@@ -12,8 +12,7 @@ public:
     bool shouldClose();
 private:
     GLFWwindow *mWindow;
-    GLuint shaderProgram{};
-    GLuint VAO{};
+    GLuint m_shader_program_flat{};
 };
 
 

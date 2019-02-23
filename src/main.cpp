@@ -32,8 +32,8 @@ int main()
     
     Simulator simulator{};
 
-    simulator.add(PhysObject{ Circle{1.0, Vec2f{0, 9.0}}, Vec2f{0, -2}, 0.2, 1.0, });
-    simulator.add(PhysObject{ Circle{1.0, Vec2f{0, -9.0}}, Vec2f{0, 2}, 0.2, 5.0, });
+    simulator.add(PhysObject{ Circle{1.0, Vec2f{0, 9.0}}, Vec2f{0, -3}, 0.2, 1.0, });
+    simulator.add(PhysObject{ Circle{2.0, Vec2f{0, -9.0}}, Vec2f{0, 3}, 0.2, 1.0, });
 
 
     OpenGLRenderer renderer{};
