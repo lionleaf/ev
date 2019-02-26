@@ -1,24 +1,25 @@
 #include "utils.h"
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
+std::string readFile(const char* filePath) {
+  std::string content;
+  std::ifstream fileStream(filePath, std::ios::in);
 
-std::string readFile(const char *filePath) {
-    std::string content;
-    std::ifstream fileStream(filePath, std::ios::in);
+  if (!fileStream.is_open()) {
+    std::cerr << "Could not read file " << filePath << ". File does not exist."
+              << std::endl;
 
-    if (!fileStream.is_open()) {
-        std::cerr << "Could not read file " << filePath << ". File does not exist." << std::endl;
-        return "";
-    }
+    return "";
+  }
 
-    std::string line = "";
-    while (!fileStream.eof()) {
-        std::getline(fileStream, line);
-        content.append(line + "\n");
-    }
+  std::string line = "";
+  while (!fileStream.eof()) {
+    std::getline(fileStream, line);
+    content.append(line + "\n");
+  }
 
-    fileStream.close();
-    return content;
+  fileStream.close();
+  return content;
 }
