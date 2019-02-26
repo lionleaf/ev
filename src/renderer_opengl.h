@@ -1,6 +1,7 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+// GLFW must be included after glad.h
+#include <GLFW/glfw3.h>
 #include "physics_2d.h"
 
 class OpenGLRenderer {
