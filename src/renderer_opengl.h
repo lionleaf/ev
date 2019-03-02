@@ -15,4 +15,5 @@ class OpenGLRenderer {
  private:
   GLFWwindow* mWindow;
   GLuint m_shader_program_flat{};
+  GLuint m_shader_program_circle{};
 };
