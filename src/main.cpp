@@ -33,12 +33,16 @@ int main() {
 
   srand(1337); //seed random
   for(int i = 0; i < 50; i++){
+      float radius = (rand() % 20) / 10.0f;
+      float restitution = 0.3f;
+
+      Vec2f pos {static_cast<float>(rand()%100 - 50), static_cast<float>(rand()%100 - 50)}; 
+      Vec2f vel {-pos.x/10.0f, -pos.y/10.0f}; 
+      float mass = radius * radius * radius; //We are used to 3D masses.
+
       simulator.add(PhysObject{
-          Circle{1.0, 
-          Vec2f{static_cast<float>(rand()%20 - 10), static_cast<float>(rand()%20 - 10)}},
-          Vec2f{(rand()%10)/2.0f,static_cast<float>(rand()%10)/2.0f},
-          0.2,
-          1.0,
+          Circle{radius, pos}, vel,
+          restitution, mass
       });
   }
 
