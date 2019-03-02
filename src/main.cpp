@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 #include "physics_2d.h"
 #include "renderer_opengl.h"
 
@@ -30,18 +31,17 @@ int main() {
 
   Simulator simulator{};
 
-  simulator.add(PhysObject{
-      Circle{1.0, Vec2f{0, 9.0}},
-      Vec2f{0, -3},
-      0.2,
-      1.0,
-  });
-  simulator.add(PhysObject{
-      Circle{2.0, Vec2f{0, -9.0}},
-      Vec2f{0, 3},
-      0.2,
-      1.0,
-  });
+  srand(1337); //seed random
+  for(int i = 0; i < 50; i++){
+      simulator.add(PhysObject{
+          Circle{1.0, 
+          Vec2f{static_cast<float>(rand()%20 - 10), static_cast<float>(rand()%20 - 10)}},
+          Vec2f{(rand()%10)/2.0f,static_cast<float>(rand()%10)/2.0f},
+          0.2,
+          1.0,
+      });
+  }
+
 
   OpenGLRenderer renderer{};
   renderer.init();
