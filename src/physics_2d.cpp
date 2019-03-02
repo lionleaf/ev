@@ -23,6 +23,7 @@ bool AABBvsAABB(AABB a, AABB b) {
     return false;
   return true;
 }
+
 bool CirclevsCircle(Circle a, Circle b) {
   float combined_r = a.radius + b.radius;
   combined_r *= combined_r;

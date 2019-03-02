@@ -1,8 +1,8 @@
 #include "main.h"
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <cstdlib>
 #include "physics_2d.h"
 #include "renderer_opengl.h"
 
@@ -31,21 +31,18 @@ int main() {
 
   Simulator simulator{};
 
-  srand(1337); //seed random
-  for(int i = 0; i < 50; i++){
-      float radius = (rand() % 20) / 10.0f;
-      float restitution = 0.3f;
+  srand(1337);  // seed random
+  for (int i = 0; i < 50; i++) {
+    float radius = (rand() % 20) / 10.0f;
+    float restitution = 0.3f;
 
-      Vec2f pos {static_cast<float>(rand()%100 - 50), static_cast<float>(rand()%100 - 50)}; 
-      Vec2f vel {-pos.x/10.0f, -pos.y/10.0f}; 
-      float mass = radius * radius * radius; //We are used to 3D masses.
+    Vec2f pos{static_cast<float>(rand() % 100 - 50),
+              static_cast<float>(rand() % 100 - 50)};
+    Vec2f vel{-pos.x / 10.0f, -pos.y / 10.0f};
+    float mass = radius * radius * radius;  // We are used to 3D masses.
 
-      simulator.add(PhysObject{
-          Circle{radius, pos}, vel,
-          restitution, mass
-      });
+    simulator.add(PhysObject{Circle{radius, pos}, vel, restitution, mass});
   }
-
 
   OpenGLRenderer renderer{};
   renderer.init();
