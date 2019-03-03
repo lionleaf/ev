@@ -56,6 +56,14 @@ Vec2f inline operator*(Vec2f b, float a) {
 Vec2f inline operator*(float a, Vec2f b) {
   return {a * b.x, a * b.y};
 }
+  
+  Vec2f inline operator/(Vec2f a, float b) {
+    return {a.x / b, a.y / b};
+  }
+  
+Vec2f inline operator/(float a, Vec2f b) {
+    return {a / b.x, a / b.y};
+}
 
 float SquaredDistance(Vec2f a, Vec2f b);
 float Distance(Vec2f a, Vec2f b);

@@ -22,7 +22,7 @@ float perfTestFunction() {
 
 int main() {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  float something = perfTestFunction();
+  perfTestFunction();
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
   auto duration = duration_cast<microseconds>(t2 - t1).count();
@@ -30,19 +30,23 @@ int main() {
   cout << duration;
 
   Simulator simulator{};
-
+  //Add ground
+  simulator.add(PhysObject{Circle{1000.0f,Vec2f{0, -1009.0f}}, Vec2f{0.0f,0.0f}, 0.9f, 0.0f});
+  
   srand(1337);  // seed random
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < 30; i++) {
     float radius = (rand() % 20) / 10.0f;
     float restitution = 0.3f;
 
     Vec2f pos{static_cast<float>(rand() % 100 - 50),
               static_cast<float>(rand() % 100 - 50)};
-    Vec2f vel{-pos.x / 10.0f, -pos.y / 10.0f};
+    Vec2f vel{};
     float mass = radius * radius * radius;  // We are used to 3D masses.
 
     simulator.add(PhysObject{Circle{radius, pos}, vel, restitution, mass});
   }
+  
+  
 
   OpenGLRenderer renderer{};
   renderer.init();

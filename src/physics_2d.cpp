@@ -48,12 +48,24 @@ void ResolveCollision(PhysObject& A, PhysObject& B) {
 
   float restitution = fmin(A.restitution, B.restitution);
 
+  float a_inv_mass = A.mass == 0.0f ? 0.0f : 1.0f / A.mass; //TODO: Precalc
+  float b_inv_mass = B.mass == 0.0f ? 0.0f : 1.0f / B.mass;
+  
   float impulse_magnitude = -(1 + restitution) * vel_along_normal;
-  impulse_magnitude /= 1.0 / A.mass + 1.0 / B.mass;
+  impulse_magnitude /= (a_inv_mass + b_inv_mass);
 
   Vec2f impulse = impulse_magnitude * normal;
-  A.velocity = A.velocity + (1.0 / A.mass) * impulse;
-  B.velocity = B.velocity - (1.0 / B.mass) * impulse;
+
+  A.velocity = A.velocity + a_inv_mass * impulse;
+  B.velocity = B.velocity - b_inv_mass * impulse;
+  
+  //Avoid sinking
+  Vec2f penetration_depth = normal * (A.circle.radius + B.circle.radius - Distance(A.circle.pos, B.circle.pos));
+  const float correction_factor = 0.2f; //This can be tweaked to avoid sinking and jittering during rest
+  Vec2f correction = (penetration_depth / (a_inv_mass + b_inv_mass)) * correction_factor * -1;
+  //A.circle.pos = A.circle.pos - (a_inv_mass * correction);
+  B.circle.pos = B.circle.pos + (b_inv_mass * correction);
+
 }
 
 void Simulator::add(PhysObject object) {
@@ -61,8 +73,13 @@ void Simulator::add(PhysObject object) {
 }
 
 void Simulator::step(float dt) {
+  Vec2f gravity {0.0f, -0.1f};
   for (PhysObject& obj : m_objects) {
+    if(obj.mass == 0.0f){
+      continue; //inf mass
+    }
     obj.circle.pos = obj.circle.pos + obj.velocity * dt;
+    obj.velocity = obj.velocity + gravity * dt;
   }
   for (int i = 0; i < m_objects.size(); i++) {
     PhysObject& obj_a = m_objects.at(i);
