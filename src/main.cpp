@@ -38,7 +38,7 @@ int main() {
     float radius = (rand() % 20) / 10.0f;
     float restitution = 0.3f;
 
-    Vec2f pos{static_cast<float>(rand() % 100 - 50),
+    Vec2f pos{static_cast<float>(rand() % 30 - 15),
               static_cast<float>(rand() % 100 - 50)};
     Vec2f vel{};
     float mass = radius * radius * radius;  // We are used to 3D masses.
