@@ -1,5 +1,9 @@
 Requirements
 ========
+
+You need cmake 3.13+
+Maybe some opengl requirements (worked out of the box for me)
+
 Mac
 -------
 `brew install cmake`
@@ -7,8 +11,8 @@ Mac
 Build
 ========
 
-Install cmake (at least version 3.1)
-Possibly some opengl requirements too
+With `make`
+---------
 
 ```
 mkdir build
@@ -17,10 +21,29 @@ cmake ..
 make
 ```
 
-For Windows you open the visual studio project files instead of running `make`
+On subsequent builds you only need to run `make` from the `build` folder. No need to rerun cmake. 
 
-To rebuild it all you need to do is
-`cd build`
-`make`
+Visual Studio 2017
+-------------
+
+```
+mkdir build-vs
+cd build-vs
+cmake -G "Visual Studio 15" ..
+```
+
+Note that if you run from windows it might be enough to just do `cmake ..`
+
+Open the generated visual studio project file  :)
+
+Xcode
+----------
+```
+mkdir build-xcode
+cd build-xcode
+cmake -G Xcode ..
+```
+
+And you have an xcode project you can open :)
 
 
