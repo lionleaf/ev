@@ -1,6 +1,5 @@
 #include "main.h"
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include "physics_2d.h"

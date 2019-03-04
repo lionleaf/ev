@@ -1,5 +1,6 @@
 #include "physics_2d.h"
 #include <math.h>
+#include <cstdlib>
 #include <iostream>
 #include "common.h"
 #include "ev_math.h"
@@ -58,15 +59,54 @@ void ResolveCollision(Body& A, Body& B) {
       (correction_factor * normal);
   A.circle.pos += a_inv_mass * correction;
   B.circle.pos -= b_inv_mass * correction;
+
+  // Apply friction
+  relative_velocity = A.velocity - B.velocity;  // This has changed now
+  Vec2f tangent =
+      relative_velocity - dot_product(relative_velocity, normal) * normal;
+  tangent.normalize();
+
+  float friction_impulse_magnitude =
+      dot_product(relative_velocity, tangent) * -1;
+  friction_impulse_magnitude /= (a_inv_mass + b_inv_mass);
+
+  float static_friction = 0.5;   // TODO: Should be material property
+  float dynamic_friction = 0.3;  // TODO: Should be material property
+
+  Vec2f friction_impulse{};
+
+  // Coulomb's Law  (inequality):
+  if (abs(friction_impulse_magnitude) < static_friction * impulse_magnitude) {
+    friction_impulse = tangent * friction_impulse_magnitude;
+  } else {
+    friction_impulse = -1 * impulse_magnitude * tangent * dynamic_friction;
+  }  // TODO: Research if this is actually a legit way to do friction
+
+  A.velocity += a_inv_mass * friction_impulse;
+  B.velocity -= b_inv_mass * friction_impulse;
 }
 
 float PhysicsSimulator::walking_challenge(Creature creature,
                                           OpenGLRenderer* optional_renderer) {
-  static int number_of_iterations = 60 * 10;
+  static int number_of_iterations = 60 * 55;
   static float dt = 1 / 60.0f;
   m_objects.push_back(&PHYS_OBJ_GROUND);
   creature.reset();
   m_objects.push_back(creature.phys_object());
+
+  srand(123);
+  std::vector<Body> body(200);
+  for (int i = 0; i < body.size(); i++) {
+    body[i].circle.radius = (rand() % 100) / 50.0f + 0.02f;
+    body[i].circle.pos.x = (rand() % 200 - 100) / 10.0f;
+    body[i].circle.pos.y = (rand() % 100) / 10.0f + i;
+    body[i].mass = 3.14f * pow(body[i].circle.radius, 3);  // We are used to 3D
+    body[i].restitution = 0.5f;
+    body[i].velocity.x = (rand() % 100 / 10.f - 5);
+    body[i].velocity.y = (rand() % 100 / 10.f - 5);
+    m_objects.push_back(&body[i]);
+  }
+
   for (int i = 0; i < number_of_iterations; ++i) {
     step(dt);
     creature.update(dt);
@@ -75,8 +115,10 @@ float PhysicsSimulator::walking_challenge(Creature creature,
         return -1.0f;  // Interrupted by user!
       }
       optional_renderer->clear();
-      optional_renderer->drawCircle(PHYS_OBJ_GROUND.circle);
-      optional_renderer->drawCreature(creature);
+      for (Body* body : m_objects) {
+        optional_renderer->drawCircle(body->circle);
+      }
+
       optional_renderer->finishRendering();
     }
   }
@@ -89,7 +131,7 @@ void PhysicsSimulator::add(Body* object) {
 }
 
 void PhysicsSimulator::step(float dt) {
-  Vec2f gravity{0.0f, -2.5f};
+  Vec2f gravity{0.0f, -5.5f};
   for (Body* obj : m_objects) {
     if (obj->mass == 0.0f) {
       continue;  // inf mass

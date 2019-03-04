@@ -1,8 +1,20 @@
 #pragma once
+#include <math.h>
 
 struct Vec2f {
   float x;
   float y;
+
+  void inline normalize() {
+    float len = sqrt(pow(x, 2) + pow(x, 2));
+    if (len == 0.0f) {
+      x = 0;
+      y = 0;
+    } else {
+      x = x / len;
+      y = y / len;
+    }
+  }
 
   Vec2f inline operator=(Vec2f a) {
     x = a.x;
