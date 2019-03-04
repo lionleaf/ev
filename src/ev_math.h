@@ -11,18 +11,18 @@ struct Vec2f {
   }
 
   Vec2f inline operator+(Vec2f a) { return {a.x + x, a.y + y}; }
-  Vec2f inline operator+=(Vec2f a) {
+  inline Vec2f& operator+=(Vec2f a) {
     x += a.x;
     y += a.y;
     return *this;
   }
   const Vec2f inline operator-(Vec2f a) const { return {a.x - x, a.y - y}; }
-  Vec2f inline operator-=(Vec2f a) {
+  inline Vec2f& operator-=(Vec2f a) {
     x -= a.x;
     y -= a.y;
     return *this;
   }
-  Vec2f inline operator-(Vec2f a) { return {a.x - x, a.y - y}; }
+  Vec2f inline operator-(Vec2f a) { return {x - a.x, y - a.y}; }
   float inline operator*(Vec2f a) { return a.x * x + a.y * y; }
 };
 

@@ -19,13 +19,13 @@ bool CirclevsCircle(Circle a, Circle b) {
 }
 
 Vec2f collisionNormal(Circle A, Circle B) {
-  Vec2f unormalized = B.pos - A.pos;
+  Vec2f unormalized = A.pos - B.pos;
   float len = sqrt(pow(unormalized.x, 2) + pow(unormalized.y, 2));
   return Vec2f{unormalized.x / len, unormalized.y / len};
 }
 
 void ResolveCollision(Body& A, Body& B) {
-  Vec2f relative_velocity = B.velocity - A.velocity;
+  Vec2f relative_velocity = A.velocity - B.velocity;
   Vec2f normal = collisionNormal(A.circle, B.circle);
 
   float vel_along_normal = dot_product(relative_velocity, normal);
@@ -48,14 +48,16 @@ void ResolveCollision(Body& A, Body& B) {
   B.velocity = B.velocity - b_inv_mass * impulse;
 
   // Avoid sinking
-  Vec2f penetration_depth = normal * (A.circle.radius + B.circle.radius -
-                                      distance(A.circle.pos, B.circle.pos));
+  float penetration_depth =
+      A.circle.radius + B.circle.radius - distance(A.circle.pos, B.circle.pos);
+  const float epsilon = 0.01;  // No sink correction if it's only a tiny sinkage
   const float correction_factor =
       0.2f;  // This can be tweaked to avoid sinking and jittering during rest
   Vec2f correction =
-      (penetration_depth / (a_inv_mass + b_inv_mass)) * correction_factor * -1;
-  // A.circle.pos = A.circle.pos - (a_inv_mass * correction);
-  B.circle.pos = B.circle.pos + (b_inv_mass * correction);
+      (fmax(penetration_depth - epsilon, 0.0f) / (a_inv_mass + b_inv_mass)) *
+      (correction_factor * normal);
+  A.circle.pos += a_inv_mass * correction;
+  B.circle.pos -= b_inv_mass * correction;
 }
 
 float PhysicsSimulator::walking_challenge(Creature creature,
