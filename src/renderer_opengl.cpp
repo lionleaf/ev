@@ -6,9 +6,7 @@
 #include "utils.h"
 #include "utils_opengl.h"
 
-using namespace phys;
-
-void OpenGLRenderer::init() {
+OpenGLRenderer::OpenGLRenderer() {
   // GLFW init
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -142,4 +140,8 @@ void OpenGLRenderer::drawCircle(Circle circle) {
   GL(glDeleteVertexArrays(1, &vao));
   GL(glDeleteBuffers(1, &vbo));
   GL(glDeleteBuffers(1, &ebo));
+}
+
+void OpenGLRenderer::drawCreature(Creature& creature) {
+  drawCircle(creature.phys_object()->circle);
 }

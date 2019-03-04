@@ -2,13 +2,14 @@
 #include <glad/glad.h>
 // GLFW must be included after glad.h
 #include <GLFW/glfw3.h>
-#include "physics_2d.h"
+#include "common.h"
 
 class OpenGLRenderer {
  public:
-  void init();
+  OpenGLRenderer();
   void clear();
-  void drawCircle(phys::Circle circle);
+  void drawCircle(Circle circle);
+  void drawCreature(Creature& creature);
   void finishRendering();
   bool shouldClose();
 
