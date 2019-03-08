@@ -21,10 +21,10 @@ class Creature {
   Creature();
   void reset(){};
   void update(float dt);
-  Body* phys_object() { return &m_phys_obj; };
+  Body* body() { return &m_body; };
 
  private:
-  Body m_phys_obj{};
+  Body m_body{};
   Vec2f m_gene_velocity{};
   float m_time_accumulator{0};
 };

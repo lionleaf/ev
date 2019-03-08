@@ -92,7 +92,7 @@ float PhysicsSimulator::walking_challenge(Creature creature,
   static float dt = 1 / 60.0f;
   m_objects.push_back(&PHYS_OBJ_GROUND);
   creature.reset();
-  m_objects.push_back(creature.phys_object());
+  m_objects.push_back(creature.body());
 
   srand(123);
   std::vector<Body> body(200);
@@ -123,7 +123,7 @@ float PhysicsSimulator::walking_challenge(Creature creature,
     }
   }
   m_objects.clear();
-  return creature.phys_object()->circle.pos.x;
+  return creature.body()->circle.pos.x;
 }
 
 void PhysicsSimulator::add(Body* object) {

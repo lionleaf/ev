@@ -143,5 +143,5 @@ void OpenGLRenderer::drawCircle(Circle circle) {
 }
 
 void OpenGLRenderer::drawCreature(Creature& creature) {
-  drawCircle(creature.phys_object()->circle);
+  drawCircle(creature.body()->circle);
 }
