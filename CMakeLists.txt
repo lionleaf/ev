@@ -34,8 +34,8 @@ add_subdirectory(extern/glfw-3.2.1 EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glfw)
 
 #Copy shader files on every compile
-add_custom_target(
-        TARGET ev POST_BUILD
+add_custom_command(
+        TARGET ev PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:ev>/shaders #For make and Xcode
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -45,5 +45,3 @@ add_custom_target(
 
 #Add "Shaders" as a list of files in Visual Studio, XCode etc
 source_group("Shaders" FILES REGULAR_EXPRESSION "shaders/.*\.(vert|frag)")
-
-
