@@ -3,8 +3,17 @@
 #include "common.h"
 #include "renderer_opengl.h"
 
-static Body PHYS_OBJ_GROUND{Circle{1000.0f, Vec2f{0, -1009.0f}},
-                            Vec2f{0.0f, 0.0f}, 0.9f, 0.0f};
+static Body PHYS_OBJ_GROUND{{Circle{1000.0f, Vec2f{0, -1009.0f}}},
+                            Vec2f{0.0f, 0.0f},
+                            0.9f,
+                            0.0f};
+
+struct CollisionData {
+  Body& body_a;
+  Body& body_b;
+  Vec2f normal{};
+  float penetration_depth{};
+};
 
 class PhysicsSimulator {
  public:
@@ -17,11 +26,7 @@ class PhysicsSimulator {
   std::vector<Body*> m_objects{};
 };
 
-bool AABBvsAABB(AABB a, AABB b);
-bool CirclevsCircle(Circle a, Circle b);
+bool AABBvsAABB(AABB a, AABB b, CollisionData& collision_data);
+bool circle_vs_circle(Circle a, Circle b, CollisionData& collision_data);
 
-Vec2f collisionNormal(Circle A, Circle B);
-
-void ResolveCollision(const Body& A, const Body& B);
-
-Vec2f collisionNormal(Circle A, Circle B);
+void resolve_collision(const CollisionData& collision_data);
