@@ -11,7 +11,9 @@ class OpenGLRenderer {
   void drawCreature(Creature& creature);
   void draw_body(const Body& body);
   void draw_circle(Circle circle, Vec2f offset);
+  void draw_rect(AABB rect, Vec2f offset);
   void finishRendering();
+
   bool shouldClose();
 
  private:

@@ -151,14 +151,14 @@ float PhysicsSimulator::walking_challenge(Creature creature,
   srand(123);
   std::vector<Body> body(0);
   for (int i = 0; i < body.size(); i++) {
-    body[i].circles.push_back(Circle{});
-    body[i].circles[0].radius = (rand() % 100) / 50.0f + 0.02f;
-    body[i].circles[0].pos.x = (rand() % 20 - 10) / 10.0f;
-    body[i].circles[0].pos.y = (rand() % 10) / 10.0f;
-    body[i].circles.push_back(Circle{});
-    body[i].circles[1].radius = (rand() % 100) / 50.0f + 0.02f;
-    body[i].circles[1].pos.x = (rand() % 20 - 10) / 10.0f;
-    body[i].circles[1].pos.y = (rand() % 10) / 10.0f;
+    /* body[i].circles.push_back(Circle{});
+     body[i].circles[0].radius = (rand() % 100) / 50.0f + 0.02f;
+     body[i].circles[0].pos.x = (rand() % 20 - 10) / 10.0f;
+     body[i].circles[0].pos.y = (rand() % 10) / 10.0f;
+     body[i].circles.push_back(Circle{});
+     body[i].circles[1].radius = (rand() % 100) / 50.0f + 0.02f;
+     body[i].circles[1].pos.x = (rand() % 20 - 10) / 10.0f;
+     body[i].circles[1].pos.y = (rand() % 10) / 10.0f;*/
     body[i].rects.push_back(AABB{});
     body[i].rects[0].min.x = (rand() % 20 - 10) / 10.0f;
     body[i].rects[0].min.y = (rand() % 20 - 10) / 10.0f;
@@ -166,8 +166,8 @@ float PhysicsSimulator::walking_challenge(Creature creature,
     body[i].rects[0].max.y = (rand() % 20 - 10) / 10.0f;
     body[i].pos.x = (rand() % 200 - 100) / 10.0f;
     body[i].pos.y = (rand() % 100) / 10.0f + i;
-    body[i].mass =
-        3.14f * pow(body[i].circles[0].radius, 3);  // We are used to 3D
+    body[i].mass = 10;
+    // 3.14f * pow(body[i].circles[0].radius, 3);  // We are used to 3D
     body[i].restitution = 0.5f;
     body[i].velocity.x = (rand() % 100 / 10.f - 5);
     body[i].velocity.y = (rand() % 100 / 10.f - 5);

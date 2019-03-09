@@ -4,7 +4,7 @@
 #include "renderer_opengl.h"
 
 static Body PHYS_OBJ_GROUND{{Circle{1000.0f, Vec2f{0, -1009.0f}}},
-                            {},
+                            {AABB{{-10.0f, -11.0f}, {10.0f, -9.0f}}},
                             Vec2f{0.0f, 0.0f},
                             0.9f,
                             0.0f};
