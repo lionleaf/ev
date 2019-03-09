@@ -5,11 +5,48 @@
 #include "common.h"
 #include "ev_math.h"
 
-bool AABBvsAABB(AABB a, AABB b) {
-  if (a.max.x < b.min.x || a.min.x > b.max.x)
+bool AABB_vs_AABB(AABB relative_a,
+                  AABB relative_b,
+                  CollisionData& collision_data) {
+  // Create new AABB in world space
+  AABB abox = relative_a;
+  abox.min += collision_data.body_a.pos;
+  abox.max += collision_data.body_a.pos;
+  AABB bbox = relative_b;
+  bbox.min += collision_data.body_b.pos;
+  bbox.max += collision_data.body_b.pos;
+
+  Vec2f a_to_b = bbox.min - abox.min;
+
+  Vec2f a_extent = (abox.max - abox.min) / 2.0f;
+  Vec2f b_extent = (bbox.max - bbox.min) / 2.0f;
+
+  float x_overlap = a_extent.x + b_extent.x - abs(a_to_b.x);
+  if (x_overlap <= 0) {
     return false;
-  if (a.max.y < b.min.y || a.min.y > b.max.y)
+  }
+
+  float y_overlap = a_extent.y + b_extent.y - abs(a_to_b.y);
+  if (y_overlap <= 0) {
     return false;
+  }
+
+  // Which axis has minimum penetration?
+  if (x_overlap > y_overlap) {  // More penetration in X
+    collision_data.penetration_depth = x_overlap;
+    if (a_to_b.x < 0) {
+      collision_data.normal = Vec2f{-1, 0};
+    } else {
+      collision_data.normal = Vec2f{1, 0};
+    }
+  } else {  // More penetration in Y
+    collision_data.penetration_depth = y_overlap;
+    if (a_to_b.y < 0) {
+      collision_data.normal = Vec2f{0, -1};
+    } else {
+      collision_data.normal = Vec2f{0, 1};
+    }
+  }
   return true;
 }
 
@@ -122,10 +159,11 @@ float PhysicsSimulator::walking_challenge(Creature creature,
     body[i].circles[1].radius = (rand() % 100) / 50.0f + 0.02f;
     body[i].circles[1].pos.x = (rand() % 20 - 10) / 10.0f;
     body[i].circles[1].pos.y = (rand() % 10) / 10.0f;
-    body[i].circles.push_back(Circle{});
-    body[i].circles[2].radius = (rand() % 100) / 50.0f + 0.02f;
-    body[i].circles[2].pos.x = (rand() % 20 - 10) / 10.0f;
-    body[i].circles[2].pos.y = (rand() % 10) / 10.0f;
+    body[i].rects.push_back(AABB{});
+    body[i].rects[0].min.x = (rand() % 20 - 10) / 10.0f;
+    body[i].rects[0].min.y = (rand() % 20 - 10) / 10.0f;
+    body[i].rects[0].max.x = (rand() % 20 - 10) / 10.0f;
+    body[i].rects[0].max.y = (rand() % 20 - 10) / 10.0f;
     body[i].pos.x = (rand() % 200 - 100) / 10.0f;
     body[i].pos.y = (rand() % 100) / 10.0f + i;
     body[i].mass =
@@ -168,25 +206,36 @@ void PhysicsSimulator::step(float dt) {
     obj->pos = obj->pos + obj->velocity * dt;
     obj->velocity = obj->velocity + gravity * dt;
   }
-  std::vector<CollisionData> potential_collisions{};
+  std::vector<CollisionData> collisions{};
 
   for (int i = 0; i < m_objects.size(); i++) {
     Body* obj_a = m_objects.at(i);
     for (int j = i + 1; j < m_objects.size(); j++) {
       Body* obj_b = m_objects.at(j);
+
       for (Circle circle_a : obj_a->circles) {
         for (Circle circle_b : obj_b->circles) {
           CollisionData collision_data{*obj_a, *obj_b};
           if (circle_vs_circle(circle_a, circle_b, collision_data)) {
-            potential_collisions.push_back(std::move(collision_data));
+            collisions.push_back(std::move(collision_data));
           }
         }
       }
+
+      for (AABB rect_a : obj_a->rects) {
+        for (AABB rect_b : obj_b->rects) {
+          CollisionData collision_data{*obj_a, *obj_b};
+          if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+      // TODO: AABB_vs_circle
     }
   }
 
-  for (CollisionData collision_data : potential_collisions) {
-    resolve_collision(collision_data);
+  for (CollisionData collision : collisions) {
+    resolve_collision(collision);
   }
 }
 

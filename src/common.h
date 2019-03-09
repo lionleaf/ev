@@ -4,6 +4,7 @@
 
 struct Body {
   std::vector<Circle> circles{};
+  std::vector<AABB> rects{};
   Vec2f velocity{};
   float restitution{};  // How bouncy this object is in collisions
   float mass{};
