@@ -87,7 +87,7 @@ void ResolveCollision(Body& A, Body& B) {
 }
 
 float PhysicsSimulator::walking_challenge(Creature creature,
-                                          OpenGLRenderer* optional_renderer) {
+                                          OpenGLRenderer* optional_renderer = 0) {
   static int number_of_iterations = 60 * 55;
   static float dt = 1 / 60.0f;
   m_objects.push_back(&PHYS_OBJ_GROUND);
@@ -95,7 +95,7 @@ float PhysicsSimulator::walking_challenge(Creature creature,
   m_objects.push_back(creature.body());
 
   srand(123);
-  std::vector<Body> body(200);
+  std::vector<Body> body(0);
   for (int i = 0; i < body.size(); i++) {
     body[i].circle.radius = (rand() % 100) / 50.0f + 0.02f;
     body[i].circle.pos.x = (rand() % 200 - 100) / 10.0f;
