@@ -57,31 +57,32 @@ bool OpenGLRenderer::shouldClose() {
   return glfwWindowShouldClose(mWindow);
 }
 
-void OpenGLRenderer::drawCircle(Circle circle) {
+void OpenGLRenderer::draw_circle(Circle circle, Vec2f offset) {
   /* A lot of this code should be split into init
    * and tear-down code. But for now this makes
    * for easier reading even if it duplicates work*/
 
+  Vec2f pos = offset + circle.pos;
   float scale = 1 / 10.0f;
   float vertices[] = {
       // Vertex 0  Top right
-      (circle.pos.x + circle.radius) * scale,
-      (circle.pos.y + circle.radius) * scale, 0.0f, 1.0f,
+      (pos.x + circle.radius) * scale, (pos.y + circle.radius) * scale, 0.0f,
+      1.0f,
       1.0f,  // Texture coords
 
       // Vertex 1 Bottom right
-      (circle.pos.x + circle.radius) * scale,
-      (circle.pos.y - circle.radius) * scale, 0.0f, 1.0f,
+      (pos.x + circle.radius) * scale, (pos.y - circle.radius) * scale, 0.0f,
+      1.0f,
       0.0f,  // Texture coords
 
       // Vertex 2 Bottom left
-      (circle.pos.x - circle.radius) * scale,
-      (circle.pos.y - circle.radius) * scale, 0.0f, 0.0f,
+      (pos.x - circle.radius) * scale, (pos.y - circle.radius) * scale, 0.0f,
+      0.0f,
       0.0f,  // Texture coords
 
       // Vertex 3 Top left
-      (circle.pos.x - circle.radius) * scale,
-      (circle.pos.y + circle.radius) * scale, 0.0f, 0.0f,
+      (pos.x - circle.radius) * scale, (pos.y + circle.radius) * scale, 0.0f,
+      0.0f,
       1.0f,  // Texture coords
   };
 
@@ -143,5 +144,11 @@ void OpenGLRenderer::drawCircle(Circle circle) {
 }
 
 void OpenGLRenderer::drawCreature(Creature& creature) {
-  drawCircle(creature.body()->circle);
+  draw_body(creature.body());
+}
+
+void OpenGLRenderer::draw_body(const Body& body) {
+  for (Circle circle : body.circles) {
+    draw_circle(circle, body.pos);
+  }
 }

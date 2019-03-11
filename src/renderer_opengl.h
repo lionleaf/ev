@@ -8,8 +8,9 @@ class OpenGLRenderer {
  public:
   OpenGLRenderer();
   void clear();
-  void drawCircle(Circle circle);
   void drawCreature(Creature& creature);
+  void draw_body(const Body& body);
+  void draw_circle(Circle circle, Vec2f offset);
   void finishRendering();
   bool shouldClose();
 
