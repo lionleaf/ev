@@ -40,18 +40,18 @@ set_target_properties(ev PROPERTIES
 
 # armadillo for maths and giggles
 add_subdirectory(extern/armadillo-9.3 EXCLUDE_FROM_ALL)
-target_link_libraries(ev armadillo)
-target_link_libraries(hello armadillo)
+target_link_libraries(ev PRIVATE armadillo)
+target_link_libraries(hello PRIVATE armadillo)
 
 # glad library for OpenGL support
 add_subdirectory(extern/glad EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glad)
-target_link_libraries(hello glad)
+target_link_libraries(hello PRIVATE glad)
 
 #glfw for making windows
 add_subdirectory(extern/glfw-3.2.1 EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glfw)
-target_link_libraries(hello glfw)
+target_link_libraries(hello PRIVATE glfw)
 
 #Copy shader files on every compile
 add_custom_command(
