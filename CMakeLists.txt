@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 
 project(ev VERSION 0.1
            DESCRIPTION "Evolution"
            LANGUAGES C CXX)
 
-find_package(Armadillo REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 #Hello world toy example
 add_executable(hello src/helloworld.cpp
@@ -22,7 +20,6 @@ add_executable(hello src/helloworld.cpp
 set_target_properties(hello PROPERTIES
            CXX_STANDARD 17)
 
-target_link_libraries(hello ${ARMADILLO_LIBRARIES})
 
 #Main executable
 add_executable(ev 
@@ -39,6 +36,12 @@ add_executable(ev
     )
 set_target_properties(ev PROPERTIES
            CXX_STANDARD 17)
+
+
+# armadillo for maths and giggles
+add_subdirectory(extern/armadillo-9.3 EXCLUDE_FROM_ALL)
+target_link_libraries(ev armadillo)
+target_link_libraries(hello armadillo)
 
 # glad library for OpenGL support
 add_subdirectory(extern/glad EXCLUDE_FROM_ALL)
