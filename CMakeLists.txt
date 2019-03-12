@@ -17,12 +17,13 @@ add_executable(hello src/helloworld.cpp
     shaders/circle.vert shaders/circle.frag #Add shaders so they show up in Xcode
     shaders/flat.vert shaders/flat.frag
     )
+
 set_target_properties(hello PROPERTIES
            CXX_STANDARD 17)
 
 
 #Main executable
-add_executable(ev 
+add_executable(ev
     src/main.cpp src/main.h
     src/ev_math.cpp src/ev_math.h
     src/physics_2d.cpp src/physics_2d.h
@@ -34,9 +35,9 @@ add_executable(ev
     shaders/circle.vert shaders/circle.frag #Add shaders so they show up in Xcode
     shaders/flat.vert shaders/flat.frag
     )
+
 set_target_properties(ev PROPERTIES
            CXX_STANDARD 17)
-
 
 # armadillo for maths and giggles
 add_subdirectory(extern/armadillo-9.3 EXCLUDE_FROM_ALL)
@@ -65,3 +66,4 @@ add_custom_command(
 
 #Add "Shaders" as a list of files in Visual Studio, XCode etc
 source_group("Shaders" FILES REGULAR_EXPRESSION "shaders/.*\.(vert|frag)")
+

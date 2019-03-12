@@ -6,15 +6,17 @@ struct Vec2f {
   float y;
 
   void inline normalize() {
-    float len = sqrt(pow(x, 2) + pow(x, 2));
+    float len = sqrt(x * x + y * y);
     if (len == 0.0f) {
-      x = 0;
-      y = 0;
+      x = 0.0f;
+      y = 0.0f;
     } else {
-      x = x / len;
-      y = y / len;
+      x *= 1.0 / len;
+      y *= 1.0 / len;
     }
   }
+
+  bool operator==(const Vec2f& a) { return (x == a.x && y == a.y); }
 
   Vec2f inline operator=(Vec2f a) {
     x = a.x;
@@ -49,6 +51,7 @@ struct Circle {
 };
 
 float squared_distance(Vec2f a, Vec2f b);
+float squared_length(Vec2f a);
 float distance(Vec2f a, Vec2f b);
 float dot_product(Vec2f a, Vec2f b);
 

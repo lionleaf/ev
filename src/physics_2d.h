@@ -3,7 +3,7 @@
 #include "common.h"
 #include "renderer_opengl.h"
 
-static Body PHYS_OBJ_GROUND{{Circle{1000.0f, Vec2f{0, -1009.0f}}},
+static Body PHYS_OBJ_GROUND{{},
                             {AABB{{-10.0f, -800.00f}, {10.0f, -9.0f}}},
                             Vec2f{0.0f, 0.0f},
                             0.9f,
@@ -18,7 +18,10 @@ struct CollisionData {
 
 class PhysicsSimulator {
  public:
-  float walking_challenge(Creature creature, OpenGLRenderer* optional_renderer);
+  float walking_challenge(Creature creature,
+                          OpenGLRenderer* optional_renderer = nullptr,
+                          int seconds = 50,
+                          int nr_bodies = 200);
   void add(Body* object);
   void step(float dt);
   std::vector<Body*> objects();
