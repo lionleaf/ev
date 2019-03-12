@@ -5,6 +5,78 @@
 #include "common.h"
 #include "ev_math.h"
 
+// unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
+
+inline void component_clamp(const Vec2f& min, const Vec2f& max, Vec2f& vec) {
+  // Clamps each component of vec between min and max
+
+  vec.x = vec.x < min.x ? min.x : vec.x;
+  vec.x = vec.x > max.x ? max.x : vec.x;
+
+  vec.y = vec.y < min.y ? min.y : vec.y;
+  vec.y = vec.y > max.y ? max.y : vec.y;
+}
+
+bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
+  Vec2f aabb_size = aabb.max - aabb.min;
+  auto aabb_extent = aabb_size / 2;
+  Vec2f pos_aabb = collision_data.body_a.pos + aabb.min +
+                   aabb_extent;  // Center of aabb in world space
+  Vec2f pos_circle = collision_data.body_b.pos +
+                     circle.pos;  // Center of circle in world space
+  auto aabb_to_circle = pos_circle - pos_aabb;
+
+  // Compute closest point on the AABB to the circle
+  // By clamping the position of the circle center to the AABB, we get the
+  // closest point on (or inside) the AABB to the center
+  auto closest_to_circle = pos_circle;
+  component_clamp(pos_aabb - aabb_extent, pos_aabb + aabb_extent,
+                  closest_to_circle);
+
+  // If the point on the AABB closest to the circle is hitting the center of
+  // the circle, we know it's inside the AABB and need a special case (flip
+  // normal)
+  auto inside = false;
+  if (aabb_to_circle == closest_to_circle) {
+    inside = true;
+
+    if (abs(aabb_to_circle.x) > abs(aabb_to_circle.y)) {
+      if (closest_to_circle.x > 0) {
+        closest_to_circle.x = aabb_extent.x;
+      } else {
+        closest_to_circle.x = -1 * aabb_extent.x;
+      }
+    } else {
+      if (closest_to_circle.y > 0) {
+        closest_to_circle.y = aabb_extent.y;
+      } else {
+        closest_to_circle.y = -1 * aabb_extent.y;
+      }
+    }
+  }
+
+  auto normal = pos_circle - closest_to_circle;
+  auto dis = squared_length(normal);
+
+  if (dis > circle.radius * circle.radius && !inside) {
+    return false;
+  }
+
+  dis = sqrt(dis);  // Delay this until after early exit
+
+  if (inside) {
+    collision_data.normal = normal;
+    collision_data.normal.normalize();
+    collision_data.penetration_depth = circle.radius - dis;
+  } else {
+    collision_data.normal = -1 * normal;
+    collision_data.normal.normalize();
+    collision_data.penetration_depth = circle.radius - dis;
+  }
+
+  return true;
+}
+
 bool AABB_vs_AABB(AABB relative_a,
                   AABB relative_b,
                   CollisionData& collision_data) {
@@ -16,35 +88,41 @@ bool AABB_vs_AABB(AABB relative_a,
   bbox.min += collision_data.body_b.pos;
   bbox.max += collision_data.body_b.pos;
 
-  Vec2f a_to_b = bbox.min - abox.min;
+  Vec2f a_half_extent = (abox.max - abox.min) / 2.0f;
+  Vec2f b_half_extent = (bbox.max - bbox.min) / 2.0f;
 
-  Vec2f a_extent = (abox.max - abox.min) / 2.0f;
-  Vec2f b_extent = (bbox.max - bbox.min) / 2.0f;
+  Vec2f a_to_b = (bbox.min + b_half_extent) - (abox.min + a_half_extent);
 
-  float x_overlap = a_extent.x + b_extent.x - abs(a_to_b.x);
+  //     ----------      -----------------
+  //     |        |      |               |
+  //     |    .---|------|------>.       |
+  //     |        |      |               |
+  //     ----------      -----------------
+
+  float x_overlap = a_half_extent.x + b_half_extent.x - abs(a_to_b.x);
   if (x_overlap <= 0) {
     return false;
   }
 
-  float y_overlap = a_extent.y + b_extent.y - abs(a_to_b.y);
+  float y_overlap = a_half_extent.y + b_half_extent.y - abs(a_to_b.y);
   if (y_overlap <= 0) {
     return false;
   }
 
   // Which axis has minimum penetration?
-  if (x_overlap > y_overlap) {  // More penetration in X
+  if (x_overlap < y_overlap) {  // Least penetration in X
     collision_data.penetration_depth = x_overlap;
     if (a_to_b.x < 0) {
-      collision_data.normal = Vec2f{-1, 0};
-    } else {
       collision_data.normal = Vec2f{1, 0};
+    } else {
+      collision_data.normal = Vec2f{-1, 0};
     }
-  } else {  // More penetration in Y
+  } else {  // Least penetration in Y
     collision_data.penetration_depth = y_overlap;
     if (a_to_b.y < 0) {
-      collision_data.normal = Vec2f{0, -1};
-    } else {
       collision_data.normal = Vec2f{0, 1};
+    } else {
+      collision_data.normal = Vec2f{0, -1};
     }
   }
   return true;
@@ -104,9 +182,12 @@ void resolve_collision(CollisionData& collision_data) {
   B.velocity -= b_inv_mass * impulse;
 
   // Avoid sinking
-  const float epsilon = 0.01;  // No sink correction if it's only a tiny sinkage
-  const float correction_factor =
-      0.2f;  // This can be tweaked to avoid sinking and jittering during rest
+
+  // No sink correction if it's only a tiny sinkage
+  const float epsilon = 0.01f;
+  // This can be tweaked to avoid sinking and jittering during rest
+  const float correction_factor = 0.2f;
+
   Vec2f correction = (fmax(collision_data.penetration_depth - epsilon, 0.0f) /
                       (a_inv_mass + b_inv_mass)) *
                      (correction_factor * normal);
@@ -124,8 +205,8 @@ void resolve_collision(CollisionData& collision_data) {
       dot_product(relative_velocity, tangent) * -1;
   friction_impulse_magnitude /= (a_inv_mass + b_inv_mass);
 
-  float static_friction = 0.5;   // TODO: Should be material property
-  float dynamic_friction = 0.3;  // TODO: Should be material property
+  float static_friction = 0.5f;   // TODO: Should be material property
+  float dynamic_friction = 0.3f;  // TODO: Should be material property
 
   Vec2f friction_impulse{};
 
@@ -141,33 +222,35 @@ void resolve_collision(CollisionData& collision_data) {
 }
 
 float PhysicsSimulator::walking_challenge(Creature creature,
-                                          OpenGLRenderer* optional_renderer = 0) {
-  static int number_of_iterations = 60 * 55;
+                                          OpenGLRenderer* optional_renderer,
+                                          int seconds,
+                                          int nr_bodies) {
+  static int number_of_iterations = 60 * seconds;
   static float dt = 1 / 60.0f;
   m_objects.push_back(&PHYS_OBJ_GROUND);
   creature.reset();
   m_objects.push_back(&creature.body());
 
-  srand(123);
-  std::vector<Body> body(0);
-  for (int i = 0; i < body.size(); i++) {
-    body[i].circles.push_back(Circle{});
-    body[i].circles[0].radius = (rand() % 100) / 50.0f + 0.02f;
-    body[i].circles[0].pos.x = (rand() % 20 - 10) / 10.0f;
-    body[i].circles[0].pos.y = (rand() % 10) / 10.0f;
-    body[i].circles.push_back(Circle{});
-    body[i].circles[1].radius = (rand() % 100) / 50.0f + 0.02f;
-    body[i].circles[1].pos.x = (rand() % 20 - 10) / 10.0f;
-    body[i].circles[1].pos.y = (rand() % 10) / 10.0f;
-    body[i].rects.push_back(AABB{});
-    body[i].rects[0].min.x = (rand() % 20 - 10) / 10.0f;
-    body[i].rects[0].min.y = (rand() % 20 - 10) / 10.0f;
-    body[i].rects[0].max.x = (rand() % 20 - 10) / 10.0f;
-    body[i].rects[0].max.y = (rand() % 20 - 10) / 10.0f;
+  srand(3);  // Seed random for deterministic results
+  std::vector<Body> body(nr_bodies);
+  for (unsigned int i = 0; i < body.size(); i++) {
+    if (rand() % 2 == 0) {
+      body[i].circles.push_back(Circle{});
+      body[i].circles[0].radius = (rand() % 100) / 50.0f + 0.02f;
+      body[i].circles[0].pos.x = (rand() % 20 - 10) / 10.0f;
+      body[i].circles[0].pos.y = (rand() % 10) / 10.0f;
+    } else {
+      body[i].rects.push_back(AABB{});
+      body[i].rects[0].min.x = (rand() % 20 - 10) / 10.0f;
+      body[i].rects[0].min.y = (rand() % 20 - 10) / 10.0f;
+      body[i].rects[0].max.x = body[i].rects[0].min.x + (rand() % 20) / 10.0f;
+      body[i].rects[0].max.y = body[i].rects[0].min.y + (rand() % 20) / 10.0f;
+    }
+
     body[i].pos.x = (rand() % 200 - 100) / 10.0f;
     body[i].pos.y = (rand() % 100) / 10.0f + i;
-    body[i].mass =
-        3.14f * pow(body[i].circles[0].radius, 3);  // We are used to 3D
+    body[i].mass = 10;
+    // 3.14f * pow(body[i].circles[0].radius, 3);  // We are used to 3D
     body[i].restitution = 0.5f;
     body[i].velocity.x = (rand() % 100 / 10.f - 5);
     body[i].velocity.y = (rand() % 100 / 10.f - 5);
@@ -208,9 +291,9 @@ void PhysicsSimulator::step(float dt) {
   }
   std::vector<CollisionData> collisions{};
 
-  for (int i = 0; i < m_objects.size(); i++) {
+  for (unsigned int i = 0; i < m_objects.size(); i++) {
     Body* obj_a = m_objects.at(i);
-    for (int j = i + 1; j < m_objects.size(); j++) {
+    for (unsigned int j = i + 1; j < m_objects.size(); j++) {
       Body* obj_b = m_objects.at(j);
 
       for (Circle circle_a : obj_a->circles) {
@@ -226,6 +309,24 @@ void PhysicsSimulator::step(float dt) {
         for (AABB rect_b : obj_b->rects) {
           CollisionData collision_data{*obj_a, *obj_b};
           if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+
+      for (AABB rect : obj_a->rects) {
+        for (Circle circle : obj_b->circles) {
+          CollisionData collision_data{*obj_a, *obj_b};
+          if (AABB_vs_circle(rect, circle, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+
+      for (Circle circle : obj_a->circles) {
+        for (AABB rect : obj_b->rects) {
+          CollisionData collision_data{*obj_b, *obj_a};
+          if (AABB_vs_circle(rect, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
