@@ -7,19 +7,19 @@
 
 // unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
 
-inline void component_clamp(const Vec2f& min, const Vec2f& max, Vec2f& vec) {
+inline Vec2f component_clamp(const Vec2f& min, const Vec2f& max, const Vec2f& vec) {
   // Clamps each component of vec between min and max
+  auto result = Vec2f{vec.x, vec.y};
+  result.x = result.x < min.x ? min.x : result.x;
+  result.x = result.x > max.x ? max.x : result.x;
 
-  vec.x = vec.x < min.x ? min.x : vec.x;
-  vec.x = vec.x > max.x ? max.x : vec.x;
-
-  vec.y = vec.y < min.y ? min.y : vec.y;
-  vec.y = vec.y > max.y ? max.y : vec.y;
+  result.y = result.y < min.y ? min.y : result.y;
+  result.y = result.y > max.y ? max.y : result.y;
+  return result;
 }
 
-bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
-  Vec2f aabb_size = aabb.max - aabb.min;
-  auto aabb_extent = aabb_size / 2;
+bool AABB_vs_circle(const AABB& aabb, const Circle& circle, CollisionData& collision_data) {
+  auto aabb_extent = (aabb.max - aabb.min) / 2.0f;
   Vec2f pos_aabb = collision_data.body_a.pos + aabb.min +
                    aabb_extent;  // Center of aabb in world space
   Vec2f pos_circle = collision_data.body_b.pos +
@@ -29,9 +29,8 @@ bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
   // Compute closest point on the AABB to the circle
   // By clamping the position of the circle center to the AABB, we get the
   // closest point on (or inside) the AABB to the center
-  auto closest_to_circle = pos_circle;
-  component_clamp(pos_aabb - aabb_extent, pos_aabb + aabb_extent,
-                  closest_to_circle);
+  auto closest_to_circle = component_clamp(pos_aabb - aabb_extent, pos_aabb + aabb_extent,
+                  pos_circle);
 
   // If the point on the AABB closest to the circle is hitting the center of
   // the circle, we know it's inside the AABB and need a special case (flip
@@ -58,7 +57,7 @@ bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
   auto normal = pos_circle - closest_to_circle;
   auto dis = squared_length(normal);
 
-  if (dis > circle.radius * circle.radius && !inside) {
+  if (!inside && dis > circle.radius * circle.radius) {
     return false;
   }
 

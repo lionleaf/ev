@@ -30,7 +30,7 @@ class PhysicsSimulator {
   std::vector<Body*> m_objects{};
 };
 
-bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data);
+bool AABB_vs_circle(const AABB& aabb, const Circle& circle, CollisionData& collision_data);
 bool AABB_vs_AABB(AABB a, AABB b, CollisionData& collision_data);
 bool circle_vs_circle(Circle a, Circle b, CollisionData& collision_data);
 

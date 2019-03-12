@@ -24,7 +24,7 @@ void perf_experiment() {
   perfTestFunction();
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<microseconds>(t2 - t1).count();
-  cout << duration;
+  cout << (duration / 1000.0f) << endl;
 }
 
 int main() {
@@ -32,7 +32,7 @@ int main() {
   OpenGLRenderer renderer{};
   Creature test_creature{};
 
-  simulator.walking_challenge(test_creature, &renderer);
+  simulator.walking_challenge(test_creature, &renderer, 30, 0);
 
   /*// Render loop
   while (!renderer.shouldClose()) {
