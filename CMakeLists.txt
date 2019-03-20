@@ -4,6 +4,8 @@ project(ev VERSION 0.1
            DESCRIPTION "Evolution"
            LANGUAGES C CXX)
 
+# Include scripts from cmake/ directory
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 #Hello world toy example
 add_executable(hello src/helloworld.cpp
@@ -53,6 +55,11 @@ target_link_libraries(hello PRIVATE glad)
 add_subdirectory(extern/glfw-3.2.1 EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glfw)
 target_link_libraries(hello PRIVATE glfw)
+
+#Include sanitizer script that sets Address / Memory / Leak sanitizer flags
+include(sanitizers)
+target_link_libraries(ev PRIVATE sanitizers)
+target_link_libraries(hello PRIVATE sanitizers)
 
 #Copy shader files on every compile
 add_custom_command(
