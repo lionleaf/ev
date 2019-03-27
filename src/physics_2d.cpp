@@ -7,7 +7,9 @@
 
 // unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
 
-inline Vec2f component_clamp(const Vec2f& min, const Vec2f& max, const Vec2f& vec) {
+inline Vec2f component_clamp(const Vec2f& min,
+                             const Vec2f& max,
+                             const Vec2f& vec) {
   // Clamps each component of vec between min and max
   auto result = Vec2f{vec.x, vec.y};
   result.x = result.x < min.x ? min.x : result.x;
@@ -18,7 +20,9 @@ inline Vec2f component_clamp(const Vec2f& min, const Vec2f& max, const Vec2f& ve
   return result;
 }
 
-bool AABB_vs_circle(const AABB& aabb, const Circle& circle, CollisionData& collision_data) {
+bool AABB_vs_circle(const AABB& aabb,
+                    const Circle& circle,
+                    CollisionData& collision_data) {
   auto aabb_extent = (aabb.max - aabb.min) / 2.0f;
   Vec2f pos_aabb = collision_data.body_a.pos + aabb.min +
                    aabb_extent;  // Center of aabb in world space
@@ -29,8 +33,8 @@ bool AABB_vs_circle(const AABB& aabb, const Circle& circle, CollisionData& colli
   // Compute closest point on the AABB to the circle
   // By clamping the position of the circle center to the AABB, we get the
   // closest point on (or inside) the AABB to the center
-  auto closest_to_circle = component_clamp(pos_aabb - aabb_extent, pos_aabb + aabb_extent,
-                  pos_circle);
+  auto closest_to_circle = component_clamp(pos_aabb - aabb_extent,
+                                           pos_aabb + aabb_extent, pos_circle);
 
   // If the point on the AABB closest to the circle is hitting the center of
   // the circle, we know it's inside the AABB and need a special case (flip
@@ -280,7 +284,7 @@ void PhysicsSimulator::add(Body* object) {
 }
 
 void PhysicsSimulator::step(float dt) {
-  Vec2f gravity{0.0f, -5.5f};
+  Vec2f gravity{0.0f, -1.0f};
   for (Body* obj : m_objects) {
     if (obj->mass == 0.0f) {
       continue;  // inf mass
@@ -330,7 +334,6 @@ void PhysicsSimulator::step(float dt) {
           }
         }
       }
-      // TODO: AABB_vs_circle
     }
   }
 

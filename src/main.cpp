@@ -32,23 +32,7 @@ int main() {
   OpenGLRenderer renderer{};
   Creature test_creature{};
 
-  simulator.walking_challenge(test_creature, &renderer, 30, 0);
-
-  /*// Render loop
-  while (!renderer.shouldClose()) {
-    // processInput()
-    // physics
-    simulator.step(1.0f / 60.0f);
-
-    renderer.clear();
-
-    for (PhysObject obj : simulator.objects()) {
-      renderer.drawCircle(obj.circle);
-    }
-
-    // render
-    renderer.finishRendering();
-  }*/
+  simulator.walking_challenge(test_creature, &renderer, 30, 30);
 
   glfwTerminate();
   return 0;

@@ -4,7 +4,7 @@
 #include "renderer_opengl.h"
 
 static Body PHYS_OBJ_GROUND{{},
-                            {AABB{{-10.0f, -800.00f}, {10.0f, -9.0f}}},
+                            {AABB{{-100.0f, -12.0f}, {100.0f, -10.0f}}},
                             Vec2f{0.0f, 0.0f},
                             0.9f,
                             0.0f};
@@ -30,7 +30,9 @@ class PhysicsSimulator {
   std::vector<Body*> m_objects{};
 };
 
-bool AABB_vs_circle(const AABB& aabb, const Circle& circle, CollisionData& collision_data);
+bool AABB_vs_circle(const AABB& aabb,
+                    const Circle& circle,
+                    CollisionData& collision_data);
 bool AABB_vs_AABB(AABB a, AABB b, CollisionData& collision_data);
 bool circle_vs_circle(Circle a, Circle b, CollisionData& collision_data);
 

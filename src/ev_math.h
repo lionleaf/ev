@@ -11,8 +11,8 @@ struct Vec2f {
       x = 0.0f;
       y = 0.0f;
     } else {
-      x *= 1.0 / len;
-      y *= 1.0 / len;
+      x *= 1.0f / len;
+      y *= 1.0f / len;
     }
   }
 

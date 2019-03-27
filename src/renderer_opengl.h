@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 // GLFW must be included after glad.h
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
 #include "common.h"
 
 class OpenGLRenderer {
@@ -19,6 +19,18 @@ class OpenGLRenderer {
 
  private:
   GLFWwindow* mWindow;
-  GLuint m_shader_program_flat{};
-  GLuint m_shader_program_circle{};
+  int m_window_width{500};
+  int m_window_height{500};
+
+  GLuint m_flat_shader_program{};
+  GLuint m_flat_transform_loc{};
+
+  GLuint m_circle_shader_program{};
+  GLuint m_circle_transform_loc{};
+
+  glm::mat4 m_view_matrix{};
+  glm::mat4 m_projection_matrix{};
+  GLuint m_quad_vao{};
+
+  GLuint setup_quad();
 };

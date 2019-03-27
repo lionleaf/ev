@@ -16,7 +16,7 @@ class Creature {
   Creature();
   void reset(){};
   void update(float dt);
-    Vec2f m_gene_velocity{};
+  Vec2f m_gene_velocity{};
   Body& body() { return m_body; };
 
  private:

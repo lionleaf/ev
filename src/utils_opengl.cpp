@@ -12,7 +12,7 @@ void CheckOpenGLError(const char* stmt, const char* fname, int line) {
   }
 }
 
-GLuint LoadShader(const char* vertex_path, const char* fragment_path) {
+GLuint LoadProgram(const char* vertex_path, const char* fragment_path) {
   GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
   GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 

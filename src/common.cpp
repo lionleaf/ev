@@ -2,7 +2,7 @@
 
 Creature::Creature() {
   m_body.circles.push_back(Circle{1.0f, Vec2f{0.0f, 0.0f}});
-  m_body.rects.push_back(AABB{{2.0f, 2.0f}, {3.0f, 3.0f}});
+  m_body.rects.push_back(AABB{{0.0f, 0.0f}, {1.0f, 1.0f}});
   m_body.mass = 2.0f;
   m_body.restitution = 0.1f;
   m_gene_velocity = Vec2f{0.0f, 0.0f};
