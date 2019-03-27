@@ -54,6 +54,11 @@ add_subdirectory(extern/glfw-3.2.1 EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glfw)
 target_link_libraries(hello PRIVATE glfw)
 
+#GLM for rendering maths
+add_subdirectory(extern/glm EXCLUDE_FROM_ALL)
+target_link_libraries(ev PRIVATE glm_static)
+target_link_libraries(hello PRIVATE glm_static)
+
 #Copy shader files on every compile
 add_custom_command(
         TARGET ev PRE_BUILD

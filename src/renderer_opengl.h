@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 // GLFW must be included after glad.h
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include "common.h"
 
 class OpenGLRenderer {
