@@ -306,6 +306,12 @@ void PhysicsSimulator::step(float dt) {
             collisions.push_back(std::move(collision_data));
           }
         }
+        for (AABB rect : obj_b->rects) {
+          CollisionData collision_data{*obj_b, *obj_a};
+          if (AABB_vs_circle(rect, circle_a, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
       }
 
       for (AABB rect_a : obj_a->rects) {
@@ -315,21 +321,9 @@ void PhysicsSimulator::step(float dt) {
             collisions.push_back(std::move(collision_data));
           }
         }
-      }
-
-      for (AABB rect : obj_a->rects) {
         for (Circle circle : obj_b->circles) {
           CollisionData collision_data{*obj_a, *obj_b};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
-            collisions.push_back(std::move(collision_data));
-          }
-        }
-      }
-
-      for (Circle circle : obj_a->circles) {
-        for (AABB rect : obj_b->rects) {
-          CollisionData collision_data{*obj_b, *obj_a};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
+          if (AABB_vs_circle(rect_a, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
