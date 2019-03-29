@@ -296,20 +296,22 @@ void PhysicsSimulator::step(float dt) {
 
   for (unsigned int i = 0; i < m_objects.size(); i++) {
     Body* obj_a = m_objects.at(i);
-    for (unsigned int j = i + 1; j < m_objects.size(); j++) {
+    // Second loop goes backwards so that when i increments
+    // j was recently there and we hit cache OPT-2
+    for (unsigned int j = m_objects.size() - 1; j > i; j--) {
       Body* obj_b = m_objects.at(j);
 
       for (Circle circle_a : obj_a->circles) {
         for (Circle circle_b : obj_b->circles) {
           CollisionData collision_data{*obj_a, *obj_b};
           if (circle_vs_circle(circle_a, circle_b, collision_data)) {
-            collisions.push_back(std::move(collision_data));
+            resolve_collision(collision_data);
           }
         }
         for (AABB rect : obj_b->rects) {
           CollisionData collision_data{*obj_b, *obj_a};
           if (AABB_vs_circle(rect, circle_a, collision_data)) {
-            collisions.push_back(std::move(collision_data));
+            resolve_collision(collision_data);
           }
         }
       }
@@ -318,13 +320,13 @@ void PhysicsSimulator::step(float dt) {
         for (AABB rect_b : obj_b->rects) {
           CollisionData collision_data{*obj_a, *obj_b};
           if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
-            collisions.push_back(std::move(collision_data));
+            resolve_collision(collision_data);
           }
         }
         for (Circle circle : obj_b->circles) {
           CollisionData collision_data{*obj_a, *obj_b};
           if (AABB_vs_circle(rect_a, circle, collision_data)) {
-            collisions.push_back(std::move(collision_data));
+            resolve_collision(collision_data);
           }
         }
       }
@@ -332,7 +334,6 @@ void PhysicsSimulator::step(float dt) {
   }
 
   for (CollisionData collision : collisions) {
-    resolve_collision(collision);
   }
 }
 
