@@ -44,6 +44,10 @@ add_subdirectory(extern/armadillo-9.3 EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE armadillo)
 target_link_libraries(hello PRIVATE armadillo)
 
+# imgui
+add_subdirectory(extern/imgui-1.69 EXCLUDE_FROM_ALL)
+target_link_libraries(ev PRIVATE imgui)
+
 # glad library for OpenGL support
 add_subdirectory(extern/glad EXCLUDE_FROM_ALL)
 target_link_libraries(ev PRIVATE glad)

@@ -4,6 +4,7 @@
 #include <vector>
 #include "physics_2d.h"
 #include "renderer_opengl.h"
+#include "imgui.h"
 
 using namespace std;
 using namespace std::chrono;
