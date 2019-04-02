@@ -29,12 +29,17 @@ void perf_experiment() {
 }
 
 int main() {
+  //TODO:  move this somewhere else
   PhysicsSimulator simulator{};
   OpenGLRenderer renderer{};
   Creature test_creature{};
-
-  simulator.walking_challenge(test_creature, &renderer, 30, 30);
-
-  glfwTerminate();
+  
+  simulator.walking_challenge(test_creature, &renderer, 3000, 30);
+  
   return 0;
+}
+
+
+void main_loop(){
+  
 }

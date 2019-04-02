@@ -264,15 +264,18 @@ float PhysicsSimulator::walking_challenge(Creature creature,
     step(dt);
     creature.update(dt);
     if (optional_renderer) {
+      
       if (optional_renderer->shouldClose()) {
         return -1.0f;  // Interrupted by user!
       }
-      optional_renderer->clear();
+      
+      optional_renderer->start_frame();
+      
       for (Body* body : m_objects) {
         optional_renderer->draw_body(*body);
       }
 
-      optional_renderer->finishRendering();
+      optional_renderer->end_frame();
     }
   }
   m_objects.clear();

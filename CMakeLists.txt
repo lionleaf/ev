@@ -32,8 +32,13 @@ add_executable(ev
     src/utils.cpp src/utils.h
     src/utils_opengl.cpp src/utils_opengl.h
     src/common.cpp src/common.h
+    src/ev_ui.cpp src/ev_ui.h
+
     shaders/circle.vert shaders/circle.frag #Add shaders so they show up in Xcode
     shaders/flat.vert shaders/flat.frag
+
+    extern/imgui-1.69/imgui_impl_glfw.cpp extern/imgui-1.69/imgui_impl_glfw.h
+    extern/imgui-1.69/imgui_impl_opengl3.cpp extern/imgui-1.69/imgui_impl_opengl3.h
     )
 
 set_target_properties(ev PROPERTIES

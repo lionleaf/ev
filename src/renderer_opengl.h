@@ -1,4 +1,5 @@
 #pragma once
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <glad/glad.h>
 // GLFW must be included after glad.h
 #include <GLFW/glfw3.h>
@@ -8,17 +9,18 @@
 class OpenGLRenderer {
  public:
   OpenGLRenderer();
-  void clear();
-  void drawCreature(Creature& creature);
+  ~OpenGLRenderer();
+  void start_frame();
+  void end_frame();
+  void draw_creature(Creature& creature);
   void draw_body(const Body& body);
   void draw_circle(Circle circle, Vec2f offset);
   void draw_rect(AABB rect, Vec2f offset);
-  void finishRendering();
 
   bool shouldClose();
 
  private:
-  GLFWwindow* mWindow;
+  GLFWwindow* m_window;
   int m_window_width{500};
   int m_window_height{500};
 

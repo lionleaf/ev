@@ -7,12 +7,15 @@
 #include <vector>
 #include "utils.h"
 #include "utils_opengl.h"
+#include "ev_ui.h"
+
 
 void GLFWErrorCallback(int i, const char* err_str) {
   std::cout << "GLFW Error: " << err_str << std::endl;
 }
 
 OpenGLRenderer::OpenGLRenderer() {
+  
   // GLFW init
   glfwSetErrorCallback(GLFWErrorCallback);
   glfwInit();
@@ -22,23 +25,26 @@ OpenGLRenderer::OpenGLRenderer() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // Needed for Mac
 
   // Window creation
-  mWindow = glfwCreateWindow(m_window_width, m_window_height, "EvoView",
+  m_window = glfwCreateWindow(m_window_width, m_window_height, "EvoView",
                              nullptr, nullptr);
-  if (mWindow == nullptr) {
+  if (m_window == nullptr) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
   }
-  glfwMakeContextCurrent(mWindow);
+  glfwMakeContextCurrent(m_window);
 
   // Glad init
   if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
     std::cout << "Failed to init GLAD" << std::endl;
   }
 
+  //Set up the UI
+  ev_ui::init(m_window);
+  
   // Viewport setup
-  glfwGetFramebufferSize(mWindow, &m_window_width, &m_window_height);
+  glfwGetFramebufferSize(m_window, &m_window_width, &m_window_height);
   glViewport(0, 0, m_window_width, m_window_height);
-  glfwSetFramebufferSizeCallback(mWindow,
+  glfwSetFramebufferSizeCallback(m_window,
                                  [](GLFWwindow*, int width, int height) {
                                    GL(glViewport(0, 0, width, height));
                                  });
@@ -68,18 +74,34 @@ OpenGLRenderer::OpenGLRenderer() {
   GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 }
 
-void OpenGLRenderer::clear() {
+OpenGLRenderer::~OpenGLRenderer(){
+  ev_ui::destroy();
+  glfwDestroyWindow(m_window);
+  glfwTerminate();
+}
+
+void OpenGLRenderer::start_frame() {
+  glfwPollEvents();
+  
+  ev_ui::start_frame();
+  
   GL(glClearColor(0.4f, 0.2f, 0.4f, 1.0f));
   GL(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void OpenGLRenderer::finishRendering() {
-  glfwPollEvents();
-  glfwSwapBuffers(mWindow);
+void OpenGLRenderer::end_frame() {
+  
+  ev_ui::main_ui();
+  
+  ev_ui::draw();
+  
+  //Swap buffers
+  glfwMakeContextCurrent(m_window);
+  glfwSwapBuffers(m_window);
 }
 
 bool OpenGLRenderer::shouldClose() {
-  return glfwWindowShouldClose(mWindow);
+  return glfwWindowShouldClose(m_window);
 }
 
 GLuint OpenGLRenderer::setup_quad() {
@@ -211,7 +233,7 @@ void OpenGLRenderer::draw_rect(AABB rect, Vec2f offset) {
   GL(glUseProgram(0));
 }
 
-void OpenGLRenderer::drawCreature(Creature& creature) {
+void OpenGLRenderer::draw_creature(Creature& creature) {
   draw_body(creature.body());
 }
 
