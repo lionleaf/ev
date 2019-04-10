@@ -8,6 +8,7 @@
 
 class OpenGLRenderer {
  public:
+  static constexpr float frame_duration = 100.0 / 1.0;
   OpenGLRenderer();
   ~OpenGLRenderer();
   void start_frame();
@@ -17,7 +18,7 @@ class OpenGLRenderer {
   void draw_circle(Circle circle, Vec2f offset);
   void draw_rect(AABB rect, Vec2f offset);
 
-  bool shouldClose();
+  bool should_close();
 
  private:
   GLFWwindow* m_window;

@@ -5,17 +5,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "ev_ui.h"
 #include "utils.h"
 #include "utils_opengl.h"
-#include "ev_ui.h"
-
 
 void GLFWErrorCallback(int i, const char* err_str) {
   std::cout << "GLFW Error: " << err_str << std::endl;
 }
 
 OpenGLRenderer::OpenGLRenderer() {
-  
   // GLFW init
   glfwSetErrorCallback(GLFWErrorCallback);
   glfwInit();
@@ -26,7 +24,7 @@ OpenGLRenderer::OpenGLRenderer() {
 
   // Window creation
   m_window = glfwCreateWindow(m_window_width, m_window_height, "EvoView",
-                             nullptr, nullptr);
+                              nullptr, nullptr);
   if (m_window == nullptr) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
@@ -38,9 +36,9 @@ OpenGLRenderer::OpenGLRenderer() {
     std::cout << "Failed to init GLAD" << std::endl;
   }
 
-  //Set up the UI
+  // Set up the UI
   ev_ui::init(m_window);
-  
+
   // Viewport setup
   glfwGetFramebufferSize(m_window, &m_window_width, &m_window_height);
   glViewport(0, 0, m_window_width, m_window_height);
@@ -74,7 +72,7 @@ OpenGLRenderer::OpenGLRenderer() {
   GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 }
 
-OpenGLRenderer::~OpenGLRenderer(){
+OpenGLRenderer::~OpenGLRenderer() {
   ev_ui::destroy();
   glfwDestroyWindow(m_window);
   glfwTerminate();
@@ -82,25 +80,22 @@ OpenGLRenderer::~OpenGLRenderer(){
 
 void OpenGLRenderer::start_frame() {
   glfwPollEvents();
-  
+
   ev_ui::start_frame();
-  
+
   GL(glClearColor(0.4f, 0.2f, 0.4f, 1.0f));
   GL(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void OpenGLRenderer::end_frame() {
-  
-  ev_ui::main_ui();
-  
   ev_ui::draw();
-  
-  //Swap buffers
+
+  // Swap buffers
   glfwMakeContextCurrent(m_window);
   glfwSwapBuffers(m_window);
 }
 
-bool OpenGLRenderer::shouldClose() {
+bool OpenGLRenderer::should_close() {
   return glfwWindowShouldClose(m_window);
 }
 

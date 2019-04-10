@@ -1,23 +1,58 @@
 #include "evolution.h"
+#include <armadillo>
+
+using namespace arma;
 
 Evolutor::Evolutor() {}
 
-void Evolutor::step_generation() {
-  std::cout << "not implemented" << std::endl;
+Generation Evolutor::generate_fresh_generation(const int population) {
+  auto generation = Generation{};
+
+  for (int i = 0; i < population; ++i) {
+    auto dna = CreatureDNA{};
+    for (int j = 0; j < dna.dna_size; ++j) {
+      dna.raw_dna[j] = static_cast<float>(rand() % 1000000) / 1000000.0f;
+    }
+    generation.dna.push_back(std::move(dna));
+  }
+
+  return generation;
 }
 
-void Evolutor::evaluate_generation() {
-  std::cout << "not implemented" << std::endl;
-}
+Generation Evolutor::breed_next_generation(const Generation generation,
+                                           const std::vector<double> fitness,
+                                           int population) {
+  auto next_generation = Generation{};
+  next_generation.generation_nr = generation.generation_nr + 1;
 
-void Evolutor::breed_new_generation() {}
+  arma::uvec sorted_indices = arma::sort_index(arma::vec(fitness), "descend");
 
-Creature* Evolutor::get_best_creature() {
-  std::cout << "not implemented" << std::endl;
-  return nullptr;
-}
+  for (int i = 0; i < population / 5; i++) {
+    next_generation.dna.push_back(generation.dna[sorted_indices.at(i)]);
+  }
 
-std::vector<Creature> Evolutor::get_generation(int gen_nr) {
-  std::cout << "not implemented" << std::endl;
-  return std::vector<Creature>{};
+  // Get parents from the top 10 percent.
+  auto mom_indices =
+      randi<uvec>(population, distr_param(0.0, population * 0.1));
+  auto dad_indices =
+      randi<uvec>(population, distr_param(0.0, population * 0.1));
+
+  for (int i = 0; i < population; i++) {
+    CreatureDNA mom = generation.dna[sorted_indices.at(mom_indices[i])];
+    CreatureDNA dad = generation.dna[sorted_indices.at(dad_indices[i])];
+    CreatureDNA kid{};
+    for (int dna_i = 0; dna_i < kid.dna_size; ++dna_i) {
+      // Randomly pick dna from parent
+      kid.raw_dna[dna_i] = rand() % 2 ? mom.raw_dna[dna_i] : dad.raw_dna[dna_i];
+
+      if (rand() % 100 < 5) {
+        // Mutation!
+        kid.raw_dna[dna_i] +=
+            ((rand() % 1000000) / 1000000.0f) - 0.5f;  // Between -0.5 and 0.5
+      }
+    }
+    next_generation.dna.push_back(std::move(kid));
+  }
+
+  return next_generation;
 }

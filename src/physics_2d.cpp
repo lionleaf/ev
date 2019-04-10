@@ -5,7 +5,79 @@
 #include "common.h"
 #include "ev_math.h"
 
+namespace phys_2d {
 // unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
+
+void World::add(Body* object) {
+  m_objects.push_back(object);
+}
+
+void World::reset() {
+  m_objects.clear();
+}
+
+void World::step(float dt) {
+  Vec2f gravity{0.0f, -1.0f};
+  for (Body* obj : m_objects) {
+    if (obj->mass == 0.0f) {
+      continue;  // inf mass
+    }
+    obj->pos = obj->pos + obj->velocity * dt;
+    obj->velocity = obj->velocity + gravity * dt;
+  }
+  std::vector<CollisionData> collisions{};
+
+  for (unsigned int i = 0; i < m_objects.size(); i++) {
+    Body* obj_a = m_objects.at(i);
+    for (unsigned int j = i + 1; j < m_objects.size(); j++) {
+      Body* obj_b = m_objects.at(j);
+
+      for (Circle circle_a : obj_a->circles) {
+        for (Circle circle_b : obj_b->circles) {
+          CollisionData collision_data{*obj_a, *obj_b};
+          if (circle_vs_circle(circle_a, circle_b, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+
+      for (AABB rect_a : obj_a->rects) {
+        for (AABB rect_b : obj_b->rects) {
+          CollisionData collision_data{*obj_a, *obj_b};
+          if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+
+      for (AABB rect : obj_a->rects) {
+        for (Circle circle : obj_b->circles) {
+          CollisionData collision_data{*obj_a, *obj_b};
+          if (AABB_vs_circle(rect, circle, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+
+      for (Circle circle : obj_a->circles) {
+        for (AABB rect : obj_b->rects) {
+          CollisionData collision_data{*obj_b, *obj_a};
+          if (AABB_vs_circle(rect, circle, collision_data)) {
+            collisions.push_back(std::move(collision_data));
+          }
+        }
+      }
+    }
+  }
+
+  for (CollisionData collision : collisions) {
+    resolve_collision(collision);
+  }
+}
+
+std::vector<Body*>& World::objects() {
+  return m_objects;
+}
 
 inline Vec2f component_clamp(const Vec2f& min,
                              const Vec2f& max,
@@ -224,127 +296,4 @@ void resolve_collision(CollisionData& collision_data) {
   B.velocity -= b_inv_mass * friction_impulse;
 }
 
-float PhysicsSimulator::walking_challenge(Creature creature,
-                                          OpenGLRenderer* optional_renderer,
-                                          int seconds,
-                                          int nr_bodies) {
-  static int number_of_iterations = 60 * seconds;
-  static float dt = 1 / 60.0f;
-  m_objects.push_back(&PHYS_OBJ_GROUND);
-  creature.reset();
-  m_objects.push_back(&creature.body());
-
-  srand(3);  // Seed random for deterministic results
-  std::vector<Body> body(nr_bodies);
-  for (unsigned int i = 0; i < body.size(); i++) {
-    if (rand() % 2 == 0) {
-      body[i].circles.push_back(Circle{});
-      body[i].circles[0].radius = (rand() % 100) / 50.0f + 0.02f;
-      body[i].circles[0].pos.x = (rand() % 20 - 10) / 10.0f;
-      body[i].circles[0].pos.y = (rand() % 10) / 10.0f;
-    } else {
-      body[i].rects.push_back(AABB{});
-      body[i].rects[0].min.x = (rand() % 20 - 10) / 10.0f;
-      body[i].rects[0].min.y = (rand() % 20 - 10) / 10.0f;
-      body[i].rects[0].max.x = body[i].rects[0].min.x + (rand() % 20) / 10.0f;
-      body[i].rects[0].max.y = body[i].rects[0].min.y + (rand() % 20) / 10.0f;
-    }
-
-    body[i].pos.x = (rand() % 200 - 100) / 10.0f;
-    body[i].pos.y = (rand() % 100) / 10.0f + i;
-    body[i].mass = 10;
-    // 3.14f * pow(body[i].circles[0].radius, 3);  // We are used to 3D
-    body[i].restitution = 0.5f;
-    body[i].velocity.x = (rand() % 100 / 10.f - 5);
-    body[i].velocity.y = (rand() % 100 / 10.f - 5);
-    m_objects.push_back(&body[i]);
-  }
-
-  for (int i = 0; i < number_of_iterations; ++i) {
-    step(dt);
-    creature.update(dt);
-    if (optional_renderer) {
-      
-      if (optional_renderer->shouldClose()) {
-        return -1.0f;  // Interrupted by user!
-      }
-      
-      optional_renderer->start_frame();
-      
-      for (Body* body : m_objects) {
-        optional_renderer->draw_body(*body);
-      }
-
-      optional_renderer->end_frame();
-    }
-  }
-  m_objects.clear();
-  return creature.body().pos.x;
-}
-
-void PhysicsSimulator::add(Body* object) {
-  m_objects.push_back(object);
-}
-
-void PhysicsSimulator::step(float dt) {
-  Vec2f gravity{0.0f, -1.0f};
-  for (Body* obj : m_objects) {
-    if (obj->mass == 0.0f) {
-      continue;  // inf mass
-    }
-    obj->pos = obj->pos + obj->velocity * dt;
-    obj->velocity = obj->velocity + gravity * dt;
-  }
-  std::vector<CollisionData> collisions{};
-
-  for (unsigned int i = 0; i < m_objects.size(); i++) {
-    Body* obj_a = m_objects.at(i);
-    for (unsigned int j = i + 1; j < m_objects.size(); j++) {
-      Body* obj_b = m_objects.at(j);
-
-      for (Circle circle_a : obj_a->circles) {
-        for (Circle circle_b : obj_b->circles) {
-          CollisionData collision_data{*obj_a, *obj_b};
-          if (circle_vs_circle(circle_a, circle_b, collision_data)) {
-            collisions.push_back(std::move(collision_data));
-          }
-        }
-      }
-
-      for (AABB rect_a : obj_a->rects) {
-        for (AABB rect_b : obj_b->rects) {
-          CollisionData collision_data{*obj_a, *obj_b};
-          if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
-            collisions.push_back(std::move(collision_data));
-          }
-        }
-      }
-
-      for (AABB rect : obj_a->rects) {
-        for (Circle circle : obj_b->circles) {
-          CollisionData collision_data{*obj_a, *obj_b};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
-            collisions.push_back(std::move(collision_data));
-          }
-        }
-      }
-
-      for (Circle circle : obj_a->circles) {
-        for (AABB rect : obj_b->rects) {
-          CollisionData collision_data{*obj_b, *obj_a};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
-            collisions.push_back(std::move(collision_data));
-          }
-        }
-      }
-    }
-  }
-
-  for (CollisionData collision : collisions) {
-    resolve_collision(collision);
-  }
-}
-
-std::vector<Body*> PhysicsSimulator::objects() {
-  return m_objects;
-}
+}  // end namespace phys_2d

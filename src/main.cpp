@@ -2,9 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
-#include "physics_2d.h"
-#include "renderer_opengl.h"
-#include "imgui.h"
+#include "ev.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -29,17 +27,13 @@ void perf_experiment() {
 }
 
 int main() {
-  //TODO:  move this somewhere else
-  PhysicsSimulator simulator{};
-  OpenGLRenderer renderer{};
-  Creature test_creature{};
-  
-  simulator.walking_challenge(test_creature, &renderer, 3000, 30);
-  
+  // TODO:  move this somewhere else
+
+  auto ev = Ev{};
+
+  ev.main_loop();
+
   return 0;
 }
 
-
-void main_loop(){
-  
-}
+void main_loop() {}

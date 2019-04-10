@@ -11,9 +11,20 @@ struct Body {
   Vec2f pos{};
 };
 
+struct CreatureDNA {
+  constexpr static int dna_size{5};
+  float raw_dna[dna_size];
+};
+
+struct Generation {
+  int generation_nr{};
+  std::vector<CreatureDNA> dna{};
+};
+
 class Creature {
  public:
   Creature();
+  Creature(const CreatureDNA& dna);
   void reset(){};
   void update(float dt);
   Vec2f m_gene_velocity{};
