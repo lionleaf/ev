@@ -3,7 +3,7 @@
 WalkingChallenge::WalkingChallenge(Creature creature,
                                    int seconds,
                                    int nr_bodies) {
-  m_iterations_to_complete = 60 * seconds;
+  m_iterations_to_complete = 30 * seconds;
   m_creature = creature;
 
   m_world.add(&phys_2d::PHYS_OBJ_GROUND);
@@ -21,7 +21,7 @@ bool WalkingChallenge::step(float dt) {
 
 float WalkingChallenge::get_fitness() {
   assert(m_num_iterations == m_iterations_to_complete);
-  return m_creature.body().pos.x;
+  return -m_creature.body().pos.x;
 }
 
 void WalkingChallenge::reset(Creature new_creature) {

@@ -6,12 +6,18 @@
 #include <glm/mat4x4.hpp>
 #include "common.h"
 
+struct Camera {
+  glm::vec3 pos{};
+  glm::vec3 look_at{};
+  glm::vec3 up{0, 1, 0};  // Positive Y is up by default
+};
+
 class OpenGLRenderer {
  public:
-  static constexpr float frame_duration = 100.0 / 1.0;
+  static constexpr double frame_duration = 1.0 / 30.0;
   OpenGLRenderer();
   ~OpenGLRenderer();
-  void start_frame();
+  void start_frame(Camera camera);
   void end_frame();
   void draw_creature(Creature& creature);
   void draw_body(const Body& body);

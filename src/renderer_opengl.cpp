@@ -78,8 +78,10 @@ OpenGLRenderer::~OpenGLRenderer() {
   glfwTerminate();
 }
 
-void OpenGLRenderer::start_frame() {
+void OpenGLRenderer::start_frame(Camera camera) {
   glfwPollEvents();
+  
+  m_view_matrix = glm::lookAt(camera.pos, camera.look_at, camera.up);
 
   ev_ui::start_frame();
 

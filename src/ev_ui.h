@@ -1,4 +1,5 @@
 #pragma once
+#include "ev_math.h"
 #include <vector>
 #include <glad/glad.h>
 // GLFW must be included after glad.h
@@ -18,6 +19,8 @@ void start_frame();
 // called from different locations
 void main_ui();
   
+void camera_control(Vec2f& pos);
+
 void generation_info(int nr, int creature_nr, std::vector<float> fitness);
 
 // Called at the end of frame to draw and display the UI

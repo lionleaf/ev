@@ -17,6 +17,7 @@ Creature::Creature(const CreatureDNA& dna) {
   m_time_accumulator = 0.0f;
 
   m_gene_velocity = Vec2f{dna.raw_dna[0], dna.raw_dna[1]};
+  m_body.velocity = m_gene_velocity;
 }
 
 void Creature::update(float dt) {

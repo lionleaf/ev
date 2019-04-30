@@ -4,6 +4,8 @@
 #include "common.h"
 #include "physics_2d.h"
 
+using std::vector;
+
 class Evolutor {
  public:
   Evolutor();
@@ -11,6 +13,8 @@ class Evolutor {
   Generation breed_next_generation(const Generation generation,
                                    const std::vector<double> fitness,
                                    int population);
+  vector<float>& get_max_fitness_plot();
 
  private:
+  vector<float> m_generational_best_fitness{};
 };

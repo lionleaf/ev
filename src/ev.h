@@ -14,6 +14,7 @@ class Ev {
   // stats per generation (dem plots)
   // Simulator
   // Renderer
+  
   Evolutor m_evolutor{};
   OpenGLRenderer m_renderer{};
 

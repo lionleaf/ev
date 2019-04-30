@@ -20,6 +20,7 @@ class World {
 
  private:
   std::vector<Body*> m_objects{};
+  std::vector<std::unique_ptr<Body>> m_tmp_body_storage{};
 };
 
 struct CollisionData {
