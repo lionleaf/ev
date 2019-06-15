@@ -31,6 +31,16 @@ OpenGLRenderer::OpenGLRenderer() {
   }
   glfwMakeContextCurrent(m_window);
 
+  glfwSetWindowUserPointer(m_window, this);
+
+  auto scroll_callback_redirect = [](GLFWwindow* w, double offset_x,
+                                     double offset_y) {
+    static_cast<OpenGLRenderer*>(glfwGetWindowUserPointer(w))
+        ->scroll_callback(w, offset_y);
+  };
+
+  glfwSetScrollCallback(m_window, scroll_callback_redirect);
+
   // Glad init
   if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
     std::cout << "Failed to init GLAD" << std::endl;
@@ -57,11 +67,11 @@ OpenGLRenderer::OpenGLRenderer() {
   m_circle_transform_loc =
       glGetUniformLocation(m_circle_shader_program, "transform");
 
-  auto camera_pos = glm::vec3{0, 0, 50};  // Look down -Z axis.
-  auto camera_look_at = glm::vec3{0, 0, 0};
-  auto camera_up = glm::vec3{0, 1, 0};  // Positive Y is up
+  m_camera.pos = glm::vec3{0, 0, 50};  // Look down -Z axis.
+  m_camera.look_at = glm::vec3{0, 0, 0};
+  m_camera.up = glm::vec3{0, 1, 0};  // Positive Y is up
 
-  m_view_matrix = glm::lookAt(camera_pos, camera_look_at, camera_up);
+  m_view_matrix = glm::lookAt(m_camera.pos, m_camera.look_at, m_camera.up);
   m_projection_matrix = glm::perspective(
       glm::radians(45.0f), float(m_window_width) / float(m_window_height), 0.1f,
       1000.0f);
@@ -78,15 +88,39 @@ OpenGLRenderer::~OpenGLRenderer() {
   glfwTerminate();
 }
 
-void OpenGLRenderer::start_frame(Camera camera) {
+void OpenGLRenderer::start_frame() {
   glfwPollEvents();
-  
-  m_view_matrix = glm::lookAt(camera.pos, camera.look_at, camera.up);
+  poll_camera_input();
+
+  m_view_matrix = glm::lookAt(m_camera.pos, m_camera.look_at, m_camera.up);
 
   ev_ui::start_frame();
 
   GL(glClearColor(0.4f, 0.2f, 0.4f, 1.0f));
   GL(glClear(GL_COLOR_BUFFER_BIT));
+}
+
+void OpenGLRenderer::scroll_callback(GLFWwindow* window, double offset) {
+  m_camera.pos.z -= offset;
+}
+
+void OpenGLRenderer::poll_camera_input() {
+  if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) {
+    m_camera.pos.y += 0.3;
+    m_camera.look_at.y += 0.3;
+  }
+  if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) {
+    m_camera.pos.y -= 0.3;
+    m_camera.look_at.y -= 0.3;
+  }
+  if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) {
+    m_camera.pos.x += 0.3;
+    m_camera.look_at.x += 0.3;
+  }
+  if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) {
+    m_camera.pos.x -= 0.3;
+    m_camera.look_at.x -= 0.3;
+  }
 }
 
 void OpenGLRenderer::end_frame() {

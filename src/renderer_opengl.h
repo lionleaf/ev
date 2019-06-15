@@ -17,17 +17,23 @@ class OpenGLRenderer {
   static constexpr double frame_duration = 1.0 / 30.0;
   OpenGLRenderer();
   ~OpenGLRenderer();
-  void start_frame(Camera camera);
+  void start_frame();
   void end_frame();
   void draw_creature(Creature& creature);
   void draw_body(const Body& body);
   void draw_circle(Circle circle, Vec2f offset);
   void draw_rect(AABB rect, Vec2f offset);
 
+  void scroll_callback(GLFWwindow* window, double offset);
+
   bool should_close();
 
  private:
+  void poll_camera_input();
+
   GLFWwindow* m_window;
+  Camera m_camera{};
+
   int m_window_width{500};
   int m_window_height{500};
 

@@ -3,14 +3,16 @@
 
 class WalkingChallenge {
  public:
-  WalkingChallenge(Creature creature, int seconds = 10, int nr_bodies = 200);
+  WalkingChallenge(CreatureDNA creatureDNA,
+                   int seconds = 10,
+                   int nr_bodies = 200);
   // Returns true if challenge is done
   bool step(float dt);
 
   // Only call after simulation is done (ie. step returns true)
   float get_fitness();
 
-  void reset(Creature new_creature);
+  void reset(CreatureDNA new_creatureDNA);
   phys_2d::World& getWorld();
 
  private:

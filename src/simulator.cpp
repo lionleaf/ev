@@ -1,10 +1,10 @@
 #include "simulator.h"
 
-WalkingChallenge::WalkingChallenge(Creature creature,
+WalkingChallenge::WalkingChallenge(CreatureDNA creatureDNA,
                                    int seconds,
                                    int nr_bodies) {
   m_iterations_to_complete = 30 * seconds;
-  m_creature = creature;
+  m_creature = Creature{creatureDNA};
 
   m_world.add(&phys_2d::PHYS_OBJ_GROUND);
   m_world.add(&m_creature.body());
@@ -24,9 +24,9 @@ float WalkingChallenge::get_fitness() {
   return -m_creature.body().pos.x;
 }
 
-void WalkingChallenge::reset(Creature new_creature) {
+void WalkingChallenge::reset(CreatureDNA new_creatureDNA) {
   m_num_iterations = 0;
-  m_creature = new_creature;
+  m_creature = Creature(new_creatureDNA);
 
   m_world.reset();
 
