@@ -59,6 +59,8 @@ add_custom_command(
         COMMENT "Copying shaders: ev" VERBATIM
         )
 
-#Add "Shaders" as a list of files in Visual Studio, XCode etc
+# Add "Shaders" as a list of files in Visual Studio, XCode etc
 source_group("Shaders" FILES REGULAR_EXPRESSION "shaders/.*\.(vert|frag)")
+# Separate source list to make Visual Studio list .h and .cpp files together
+source_group("Source" FILES REGULAR_EXPRESSION "(src/.*\.(h|cpp))|(extern/imgui-1.69/.*\.(h|cpp))")
 
