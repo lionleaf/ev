@@ -6,13 +6,13 @@ struct Vec2f {
   float y;
 
   void inline normalize() {
-    float len = sqrt(x * x + y * y);
-    if (len == 0.0f) {
+    double len = sqrt(x * x + y * y);
+    if (len == 0.0) {
       x = 0.0f;
       y = 0.0f;
     } else {
-      x *= 1.0f / len;
-      y *= 1.0f / len;
+      x *= static_cast<float>(1.0f / len);
+      y *= static_cast<float>(1.0f / len);
     }
   }
 
@@ -24,21 +24,28 @@ struct Vec2f {
     return a;
   }
 
-  Vec2f inline operator+(Vec2f a) { return {a.x + x, a.y + y}; }
-  inline Vec2f& operator+=(Vec2f a) {
+  inline Vec2f& operator+=(const Vec2f& a) {
     x += a.x;
     y += a.y;
     return *this;
   }
-  const Vec2f inline operator-(Vec2f a) const { return {x - a.x, y - a.y}; }
-  inline Vec2f& operator-=(Vec2f a) {
+  inline Vec2f& operator-=(const Vec2f& a) {
     x -= a.x;
     y -= a.y;
     return *this;
   }
-  Vec2f inline operator-(Vec2f a) { return {x - a.x, y - a.y}; }
   float inline operator*(Vec2f a) { return a.x * x + a.y * y; }
 };
+
+Vec2f inline operator+(Vec2f lhs, const Vec2f& rhs) {
+  lhs += rhs;
+  return lhs;
+}
+
+Vec2f inline operator-(Vec2f lhs, const Vec2f& rhs) {
+  lhs -= rhs;
+  return lhs;
+}
 
 struct AABB {
   Vec2f min;
@@ -61,9 +68,9 @@ float inline squared_length(Vec2f a) {
 }
 
 float inline distance(Vec2f a, Vec2f b) {
-  auto x = (a.x - b.x);
-  auto y = (a.y - b.y);
-  return sqrt(x * x + y * y);
+  float x = (a.x - b.x);
+  float y = (a.y - b.y);
+  return static_cast<float>(sqrt(x * x + y * y));
 }
 
 float inline dot_product(Vec2f a, Vec2f b) {

@@ -26,9 +26,10 @@ Generation Evolutor::breed_next_generation(const Generation generation,
   next_generation.generation_nr = generation.generation_nr + 1;
 
   arma::uvec sorted_indices = arma::sort_index(arma::vec(fitness), "descend");
-  
+
   auto max_fitness_last_gen = fitness[sorted_indices[0]];
-  m_generational_best_fitness.push_back(max_fitness_last_gen);
+  m_generational_best_fitness.push_back(
+      static_cast<float>(max_fitness_last_gen));
 
   for (int i = 0; i < population / 5; i++) {
     next_generation.dna.push_back(generation.dna[sorted_indices.at(i)]);
@@ -60,6 +61,6 @@ Generation Evolutor::breed_next_generation(const Generation generation,
   return next_generation;
 }
 
-std::vector<float>& Evolutor::get_max_fitness_plot(){
+std::vector<float>& Evolutor::get_max_fitness_plot() {
   return m_generational_best_fitness;
 }

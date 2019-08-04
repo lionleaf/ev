@@ -12,7 +12,7 @@ void Ev::main_loop() {
 
   // TODO: this should be independent, but need to decouple while rendering in
   // that case
-  float simulation_dt = m_renderer.frame_duration;
+  float simulation_dt = static_cast<float>(m_renderer.frame_duration);
   double dt_accumulator =
       1;  // Start above 0 to ensure first frame renders instantly
 

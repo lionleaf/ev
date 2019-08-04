@@ -36,7 +36,7 @@ OpenGLRenderer::OpenGLRenderer() {
   auto scroll_callback_redirect = [](GLFWwindow* w, double offset_x,
                                      double offset_y) {
     static_cast<OpenGLRenderer*>(glfwGetWindowUserPointer(w))
-        ->scroll_callback(w, offset_y);
+        ->scroll_callback(w, static_cast<float>(offset_y));
   };
 
   glfwSetScrollCallback(m_window, scroll_callback_redirect);
@@ -100,26 +100,26 @@ void OpenGLRenderer::start_frame() {
   GL(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void OpenGLRenderer::scroll_callback(GLFWwindow* window, double offset) {
+void OpenGLRenderer::scroll_callback(GLFWwindow* window, float offset) {
   m_camera.pos.z -= offset;
 }
 
 void OpenGLRenderer::poll_camera_input() {
   if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) {
-    m_camera.pos.y += 0.3;
-    m_camera.look_at.y += 0.3;
+    m_camera.pos.y += 0.3f;
+    m_camera.look_at.y += 0.3f;
   }
   if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) {
-    m_camera.pos.y -= 0.3;
-    m_camera.look_at.y -= 0.3;
+    m_camera.pos.y -= 0.3f;
+    m_camera.look_at.y -= 0.3f;
   }
   if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) {
-    m_camera.pos.x += 0.3;
-    m_camera.look_at.x += 0.3;
+    m_camera.pos.x += 0.3f;
+    m_camera.look_at.x += 0.3f;
   }
   if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) {
-    m_camera.pos.x -= 0.3;
-    m_camera.look_at.x -= 0.3;
+    m_camera.pos.x -= 0.3f;
+    m_camera.look_at.x -= 0.3f;
   }
 }
 
