@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+namespace ev {
 std::string readFile(const char* filePath) {
   std::string content;
   std::ifstream fileStream(filePath, std::ios::in);
@@ -23,3 +23,4 @@ std::string readFile(const char* filePath) {
   fileStream.close();
   return content;
 }
+}  // namespace ev

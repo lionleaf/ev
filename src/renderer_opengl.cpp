@@ -6,9 +6,11 @@
 #include <string>
 #include <vector>
 #include "ev_ui.h"
+#include "shapes.h"
 #include "utils.h"
 #include "utils_opengl.h"
 
+namespace ev {
 void GLFWErrorCallback(int i, const char* err_str) {
   std::cout << "GLFW Error: " << err_str << std::endl;
 }
@@ -198,53 +200,25 @@ GLuint OpenGLRenderer::setup_quad() {
 
   return vao;
 }
-
-void OpenGLRenderer::draw_circle(Circle circle, Vec2f offset) {
-  /* A lot of this code should be split into init
-   * and tear-down code. But for now this makes
-   * for easier reading even if it duplicates work*/
-  Vec2f pos = offset + circle.pos;
+void OpenGLRenderer::draw_polygon(const Polygon& polygon,
+                                  Vec2f body_pos,
+                                  float rotation) {
+  // Temporarily just draw a rectangle instead
+  Vec2f extent =
+      polygon.vertex(0) - polygon.vertex(polygon.m_vertices.size() / 2);
+  extent.abs();
+  extent = extent / 2.0f;
+  Vec2f pos = polygon.m_pos;
 
   auto model_to_world = glm::mat4{1.0};
   model_to_world =
-      glm::translate(model_to_world, glm::vec3{pos.x, pos.y, 0.0f});
+      glm::translate(model_to_world, glm::vec3{body_pos.x, body_pos.y, 0.0f});
   model_to_world =
-      glm::scale(model_to_world, glm::vec3{circle.radius, circle.radius, 1.0f});
-  // rotate
-
-  auto transform = m_projection_matrix * m_view_matrix * model_to_world;
-
-  // Set up state for draw
-  GL(glUseProgram(m_circle_shader_program));
-  GL(glBindVertexArray(m_quad_vao));  // vao contains bindings to ebo and vbo
-
-  // Uniforms
-  GL(glUniformMatrix4fv(m_circle_transform_loc, 1, GL_FALSE,
-                        glm::value_ptr(transform)));
-
-  // DRAW
-  GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-  // Unbind
-  GL(glBindVertexArray(0));
-  GL(glUseProgram(0));
-}
-
-void OpenGLRenderer::draw_rect(AABB rect, Vec2f offset) {
-  /* A lot of this code should be split into init
-   * and tear-down code. But for now this makes
-   * for easier reading even if it duplicates work*/
-
-  // offset = {0.0, 0.0};
-  Vec2f extent = (rect.max - rect.min) / 2.0f;
-  Vec2f pos = offset + rect.min + extent;
-
-  auto model_to_world = glm::mat4{1.0};
+      glm::rotate(model_to_world, rotation, glm::vec3{0.0f, 0.0f, 1.0f});
   model_to_world =
       glm::translate(model_to_world, glm::vec3{pos.x, pos.y, 0.0f});
   model_to_world =
       glm::scale(model_to_world, glm::vec3{extent.x, extent.y, 1.0f});
-  // rotate
 
   auto transform = m_projection_matrix * m_view_matrix * model_to_world;
 
@@ -264,15 +238,90 @@ void OpenGLRenderer::draw_rect(AABB rect, Vec2f offset) {
   GL(glUseProgram(0));
 }
 
+void OpenGLRenderer::draw_circle(Circle circle,
+                                 Vec2f body_pos,
+                                 float rotation) {
+  /* A lot of this code should be split into init
+   * and tear-down code. But for now this makes
+   * for easier reading even if it duplicates work*/
+
+  auto model_to_world = glm::mat4{1.0};
+  model_to_world =
+      glm::translate(model_to_world, glm::vec3{body_pos.x, body_pos.y, 0.0f});
+  model_to_world =
+      glm::rotate(model_to_world, rotation, glm::vec3{0.0f, 0.0f, 1.0f});
+  model_to_world = glm::translate(model_to_world,
+                                  glm::vec3{circle.pos.x, circle.pos.y, 0.0f});
+  model_to_world =
+      glm::scale(model_to_world, glm::vec3{circle.radius, circle.radius, 1.0f});
+
+  auto transform = m_projection_matrix * m_view_matrix * model_to_world;
+
+  // Set up state for draw
+  GL(glUseProgram(m_circle_shader_program));
+  GL(glBindVertexArray(m_quad_vao));  // vao contains bindings to ebo and vbo
+
+  // Uniforms
+  GL(glUniformMatrix4fv(m_circle_transform_loc, 1, GL_FALSE,
+                        glm::value_ptr(transform)));
+
+  // DRAW
+  GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+  // Unbind
+  GL(glBindVertexArray(0));
+  GL(glUseProgram(0));
+}
+
+/*void OpenGLRenderer::draw_rect(const Rect& rect,
+                               Vec2f body_pos,
+                               float rotation) {
+  // A lot of this code should be split into init
+  // and tear-down code. But for now this makes
+  //  for easier reading even if it duplicates work
+
+  Vec2f extent = rect.m_extent / 2.0f;
+  Vec2f pos = rect.m_pos;
+
+  auto model_to_world = glm::mat4{1.0};
+  model_to_world =
+      glm::translate(model_to_world, glm::vec3{body_pos.x, body_pos.y, 0.0f});
+  model_to_world =
+      glm::rotate(model_to_world, rotation, glm::vec3{0.0f, 0.0f, 1.0f});
+  model_to_world =
+      glm::translate(model_to_world, glm::vec3{pos.x, pos.y, 0.0f});
+  model_to_world =
+      glm::scale(model_to_world, glm::vec3{extent.x, extent.y, 1.0f});
+
+  auto transform = m_projection_matrix * m_view_matrix * model_to_world;
+
+  // Set up state for draw
+  GL(glUseProgram(m_flat_shader_program));
+  GL(glBindVertexArray(m_quad_vao));  // vao contains bindings to ebo and vbo
+
+  // Uniforms
+  GL(glUniformMatrix4fv(m_flat_transform_loc, 1, GL_FALSE,
+                        glm::value_ptr(transform)));
+
+  // DRAW
+  GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+  // Unbind
+  GL(glBindVertexArray(0));  // vao contains bindings to ebo and vbo
+  GL(glUseProgram(0));
+}*/
+
 void OpenGLRenderer::draw_creature(Creature& creature) {
   draw_body(creature.body());
 }
 
 void OpenGLRenderer::draw_body(const Body& body) {
-  for (Circle circle : body.circles) {
-    draw_circle(circle, body.pos);
+  for (Polygon polygon : body.polygons) {
+    draw_polygon(polygon, body.m_pos, body.m_orientation);
   }
-  for (AABB rect : body.rects) {
-    draw_rect(rect, body.pos);
+
+  for (const Circle circle : body.circles) {
+    draw_circle(circle, body.m_pos, body.m_orientation);
   }
 }
+}  // namespace ev

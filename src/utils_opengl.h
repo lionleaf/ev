@@ -6,7 +6,6 @@
 #define GL_DEBUG
 // Separate debug flag we can trigger for GL error checks
 #endif
-
 #ifdef GL_DEBUG
 #define GL(stmt)                                 \
   do {                                           \
@@ -17,5 +16,7 @@
 #define GL(stmt) stmt
 #endif
 
+namespace ev {
 void CheckOpenGLError(const char* stmt, const char* fname, int line);
 GLuint LoadProgram(const char* vertex_path, const char* fragment_path);
+}  // namespace ev

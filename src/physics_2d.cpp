@@ -2,14 +2,29 @@
 #include <math.h>
 #include <cstdlib>
 #include <iostream>
+#include "collision.h"
 #include "common.h"
 #include "ev_math.h"
+#include "shapes.h"
 
-namespace phys_2d {
+namespace ev {
+namespace phys {
 // unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
 
 void World::add(Body* object) {
   m_objects.push_back(object);
+}
+void World::add_random_bodies(uint32_t nr) {
+  for (uint32_t i = 0; i < nr; i++) {
+    std::unique_ptr<Body> object = std::make_unique<Body>();
+    object->polygons.push_back(Polygon{1.0f, 1.0f});
+    object->m_pos = Vec2f{static_cast<float>(rand() % 100),
+                          static_cast<float>(rand() % 100)};
+    object->mass = 2.0f;
+    object->restitution = 0.1f;
+    m_objects.push_back(object.get());
+    m_owned_objects.push_back(std::move(object));
+  }
 }
 
 void World::reset() {
@@ -17,13 +32,16 @@ void World::reset() {
 }
 
 void World::step(float dt) {
-  Vec2f gravity{0.0f, -1.0f};
+  Vec2f gravity{0.0f, -9.0f};
   for (Body* obj : m_objects) {
     if (obj->mass == 0.0f) {
       continue;  // inf mass
     }
-    obj->pos = obj->pos + obj->velocity * dt;
-    obj->velocity = obj->velocity + gravity * dt;
+    obj->m_pos += obj->m_velocity * dt;
+    obj->m_orientation += obj->m_angular_velocity;
+    obj->m_velocity += gravity * dt;
+    obj->m_angular_velocity +=
+        obj->m_torque * (1.0f / obj->m_moment_of_inertia) * dt;
   }
   std::vector<CollisionData> collisions{};
 
@@ -41,28 +59,28 @@ void World::step(float dt) {
         }
       }
 
-      for (AABB rect_a : obj_a->rects) {
-        for (AABB rect_b : obj_b->rects) {
+      for (Polygon poly_a : obj_a->polygons) {
+        for (Polygon poly_b : obj_b->polygons) {
           CollisionData collision_data{*obj_a, *obj_b};
-          if (AABB_vs_AABB(rect_a, rect_b, collision_data)) {
+          if (polygon_vs_polygon(poly_a, poly_b, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
       }
 
-      for (AABB rect : obj_a->rects) {
+      for (Polygon polygon : obj_a->polygons) {
         for (Circle circle : obj_b->circles) {
           CollisionData collision_data{*obj_a, *obj_b};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
+          if (polygon_vs_circle(polygon, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
       }
 
       for (Circle circle : obj_a->circles) {
-        for (AABB rect : obj_b->rects) {
+        for (Polygon polygon : obj_b->polygons) {
           CollisionData collision_data{*obj_b, *obj_a};
-          if (AABB_vs_circle(rect, circle, collision_data)) {
+          if (polygon_vs_circle(polygon, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
@@ -79,221 +97,5 @@ std::vector<Body*>& World::objects() {
   return m_objects;
 }
 
-inline Vec2f component_clamp(const Vec2f& min,
-                             const Vec2f& max,
-                             const Vec2f& vec) {
-  // Clamps each component of vec between min and max
-  auto result = Vec2f{vec.x, vec.y};
-  result.x = result.x < min.x ? min.x : result.x;
-  result.x = result.x > max.x ? max.x : result.x;
-
-  result.y = result.y < min.y ? min.y : result.y;
-  result.y = result.y > max.y ? max.y : result.y;
-  return result;
-}
-
-bool AABB_vs_circle(const AABB& aabb,
-                    const Circle& circle,
-                    CollisionData& collision_data) {
-  auto aabb_extent = (aabb.max - aabb.min) / 2.0f;
-  Vec2f pos_aabb = collision_data.body_a.pos + aabb.min +
-                   aabb_extent;  // Center of aabb in world space
-  Vec2f pos_circle = collision_data.body_b.pos +
-                     circle.pos;  // Center of circle in world space
-  auto aabb_to_circle = pos_circle - pos_aabb;
-
-  // Compute closest point on the AABB to the circle
-  // By clamping the position of the circle center to the AABB, we get the
-  // closest point on (or inside) the AABB to the center
-  auto closest_to_circle = component_clamp(pos_aabb - aabb_extent,
-                                           pos_aabb + aabb_extent, pos_circle);
-
-  // If the point on the AABB closest to the circle is hitting the center of
-  // the circle, we know it's inside the AABB and need a special case (flip
-  // normal)
-  auto inside = false;
-  if (aabb_to_circle == closest_to_circle) {
-    inside = true;
-
-    if (abs(aabb_to_circle.x) > abs(aabb_to_circle.y)) {
-      if (closest_to_circle.x > 0) {
-        closest_to_circle.x = aabb_extent.x;
-      } else {
-        closest_to_circle.x = -1 * aabb_extent.x;
-      }
-    } else {
-      if (closest_to_circle.y > 0) {
-        closest_to_circle.y = aabb_extent.y;
-      } else {
-        closest_to_circle.y = -1 * aabb_extent.y;
-      }
-    }
-  }
-
-  auto normal = pos_circle - closest_to_circle;
-  auto dis = squared_length(normal);
-
-  if (!inside && dis > circle.radius * circle.radius) {
-    return false;
-  }
-
-  dis = sqrt(dis);  // Delay this until after early exit
-
-  if (inside) {
-    collision_data.normal = normal;
-    collision_data.normal.normalize();
-    collision_data.penetration_depth = circle.radius - dis;
-  } else {
-    collision_data.normal = -1 * normal;
-    collision_data.normal.normalize();
-    collision_data.penetration_depth = circle.radius - dis;
-  }
-
-  return true;
-}
-
-bool AABB_vs_AABB(AABB relative_a,
-                  AABB relative_b,
-                  CollisionData& collision_data) {
-  // Create new AABB in world space
-  AABB abox = relative_a;
-  abox.min += collision_data.body_a.pos;
-  abox.max += collision_data.body_a.pos;
-  AABB bbox = relative_b;
-  bbox.min += collision_data.body_b.pos;
-  bbox.max += collision_data.body_b.pos;
-
-  Vec2f a_half_extent = (abox.max - abox.min) / 2.0f;
-  Vec2f b_half_extent = (bbox.max - bbox.min) / 2.0f;
-
-  Vec2f a_to_b = (bbox.min + b_half_extent) - (abox.min + a_half_extent);
-
-  //     ----------      -----------------
-  //     |        |      |               |
-  //     |    .---|------|------>.       |
-  //     |        |      |               |
-  //     ----------      -----------------
-
-  float x_overlap = a_half_extent.x + b_half_extent.x - abs(a_to_b.x);
-  if (x_overlap <= 0) {
-    return false;
-  }
-
-  float y_overlap = a_half_extent.y + b_half_extent.y - abs(a_to_b.y);
-  if (y_overlap <= 0) {
-    return false;
-  }
-
-  // Which axis has minimum penetration?
-  if (x_overlap < y_overlap) {  // Least penetration in X
-    collision_data.penetration_depth = x_overlap;
-    if (a_to_b.x < 0) {
-      collision_data.normal = Vec2f{1, 0};
-    } else {
-      collision_data.normal = Vec2f{-1, 0};
-    }
-  } else {  // Least penetration in Y
-    collision_data.penetration_depth = y_overlap;
-    if (a_to_b.y < 0) {
-      collision_data.normal = Vec2f{0, 1};
-    } else {
-      collision_data.normal = Vec2f{0, -1};
-    }
-  }
-  return true;
-}
-
-bool circle_vs_circle(Circle circle_a,
-                      Circle circle_b,
-                      CollisionData& collision_data) {
-  Vec2f a_pos =
-      collision_data.body_a.pos + circle_a.pos;  // Positions are additive
-  Vec2f b_pos =
-      collision_data.body_b.pos + circle_b.pos;  // Positions are additive
-
-  // Test intersection
-  float combined_r = circle_a.radius + circle_b.radius;
-  combined_r *= combined_r;
-
-  if (combined_r < squared_distance(a_pos, b_pos)) {
-    return false;  // No collision, early exit
-  }
-
-  // Calculate collision normal
-  Vec2f unormalized = a_pos - b_pos;
-  float len = sqrt(pow(unormalized.x, 2) + pow(unormalized.y, 2));
-  collision_data.normal = Vec2f{unormalized.x / len, unormalized.y / len};
-
-  // Calculate penetration depth used to avoid sinking.
-  collision_data.penetration_depth = circle_a.radius + circle_b.radius - len;
-
-  return true;
-}
-
-void resolve_collision(CollisionData& collision_data) {
-  Body& A = collision_data.body_a;
-  Body& B = collision_data.body_b;
-  Vec2f normal = collision_data.normal;
-
-  Vec2f relative_velocity = A.velocity - B.velocity;
-
-  float vel_along_normal = dot_product(relative_velocity, normal);
-
-  if (vel_along_normal > 0) {
-    return;  // Objects already moving apart
-  }
-
-  float restitution = fmin(A.restitution, B.restitution);
-
-  float a_inv_mass = A.mass == 0.0f ? 0.0f : 1.0f / A.mass;  // TODO: Precalc
-  float b_inv_mass = B.mass == 0.0f ? 0.0f : 1.0f / B.mass;
-
-  float impulse_magnitude = -(1 + restitution) * vel_along_normal;
-  impulse_magnitude /= (a_inv_mass + b_inv_mass);
-
-  Vec2f impulse = impulse_magnitude * normal;
-
-  A.velocity += a_inv_mass * impulse;
-  B.velocity -= b_inv_mass * impulse;
-
-  // Avoid sinking
-
-  // No sink correction if it's only a tiny sinkage
-  const float epsilon = 0.01f;
-  // This can be tweaked to avoid sinking and jittering during rest
-  const float correction_factor = 0.2f;
-
-  Vec2f correction = (fmax(collision_data.penetration_depth - epsilon, 0.0f) /
-                      (a_inv_mass + b_inv_mass)) *
-                     (correction_factor * normal);
-  // TODO: How does this work with composite bodies?
-  A.pos += a_inv_mass * correction;
-  B.pos -= b_inv_mass * correction;
-
-  // Apply friction
-  relative_velocity = A.velocity - B.velocity;  // This has changed now
-  Vec2f tangent =
-      relative_velocity - dot_product(relative_velocity, normal) * normal;
-  tangent.normalize();
-
-  float friction_impulse_magnitude =
-      dot_product(relative_velocity, tangent) * -1;
-  friction_impulse_magnitude /= (a_inv_mass + b_inv_mass);
-
-  float static_friction = 0.5f;   // TODO: Should be material property
-  float dynamic_friction = 0.3f;  // TODO: Should be material property
-
-  Vec2f friction_impulse{};
-
-  // Coulomb's Law  (inequality):
-  if (abs(friction_impulse_magnitude) < static_friction * impulse_magnitude) {
-    friction_impulse = tangent * friction_impulse_magnitude;
-  } else {
-    friction_impulse = -1 * impulse_magnitude * tangent * dynamic_friction;
-  }  // TODO: Research if this is actually a legit way to do friction
-
-  A.velocity += a_inv_mass * friction_impulse;
-  B.velocity -= b_inv_mass * friction_impulse;
-}
-
-}  // end namespace phys_2d
+}  // end namespace phys
+}  // namespace ev

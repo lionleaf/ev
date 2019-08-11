@@ -9,7 +9,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
+namespace ev {
 namespace ev_ui {
 
 void generation_info(int nr, int creature_nr, std::vector<float> fitness) {
@@ -21,14 +21,12 @@ void generation_info(int nr, int creature_nr, std::vector<float> fitness) {
   ImGui::End();
 }
 
-void camera_control(Vec2f& pos){
+void camera_control(Vec2f& pos) {
   ImGui::Begin("Camera");
-  ImGui::SliderFloat("x", &pos.x, -100.0f,
-                     100.0f);
+  ImGui::SliderFloat("x", &pos.x, -100.0f, 100.0f);
   ImGui::End();
-
 }
-  
+
 void main_ui() {
   // Some copy-pasted example UI code.
 
@@ -102,3 +100,4 @@ void destroy() {
 }
 
 }  // namespace ev_ui
+}  // namespace ev

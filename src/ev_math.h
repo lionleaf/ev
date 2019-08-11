@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-
+namespace ev {
 struct Vec2f {
   float x;
   float y;
@@ -14,6 +14,30 @@ struct Vec2f {
       x *= static_cast<float>(1.0f / len);
       y *= static_cast<float>(1.0f / len);
     }
+  }
+
+  double inline length_squared() { return (x * x + y * y); }
+
+  // Returns a copy of the vector with the rotation applied
+  Vec2f inline with_rotation(float rotation_radians) const {
+    float sn = static_cast<float>(sin(rotation_radians));
+    float cs = static_cast<float>(cos(rotation_radians));
+    return Vec2f{x * cs - y * sn, x * sn + y * cs};
+  }
+
+  void inline abs() {
+    x = fabs(x);
+    y = fabs(y);
+  }
+
+  // Rotates vector in-place
+  void inline rotate(float rotation_radians) {
+    float sn = static_cast<float>(sin(rotation_radians));
+    float cs = static_cast<float>(cos(rotation_radians));
+
+    float new_x = x * cs - y * sn;  // old x is used to calculate y, use temp
+    y = x * sn + y * cs;
+    x = new_x;
   }
 
   bool operator==(const Vec2f& a) { return (x == a.x && y == a.y); }
@@ -47,14 +71,16 @@ Vec2f inline operator-(Vec2f lhs, const Vec2f& rhs) {
   return lhs;
 }
 
+Vec2f inline operator-(Vec2f vec) {
+  vec.x = -vec.x;
+  vec.y = -vec.y;
+  return vec;
+}
+
 struct AABB {
   Vec2f min;
   Vec2f max;
-};
-
-struct Circle {
-  float radius;
-  Vec2f pos;
+  AABB(Vec2f min, Vec2f max) : min{min}, max{max} {}
 };
 
 float inline squared_distance(Vec2f a, Vec2f b) {
@@ -77,6 +103,19 @@ float inline dot_product(Vec2f a, Vec2f b) {
   return a.x * b.x + a.y * b.y;
 }
 
+float inline cross_product(const Vec2f& a, const Vec2f& b) {
+  return a.x * b.y - a.y * b.x;
+}
+
+// Note that the result of a 2D scalar cross product is order dependent
+auto inline cross_product(const Vec2f& a, float s) {
+  return Vec2f{s * a.y, -s * a.x};
+}
+
+auto inline cross_product(float s, const Vec2f& a) {
+  return Vec2f{-s * a.y, s * a.x};
+}
+
 Vec2f inline operator*(Vec2f b, float a) {
   return {a * b.x, a * b.y};
 }
@@ -92,3 +131,4 @@ Vec2f inline operator/(Vec2f a, float b) {
 Vec2f inline operator/(float a, Vec2f b) {
   return {a / b.x, a / b.y};
 }
+}  // namespace ev

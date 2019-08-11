@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "utils.h"
-
+namespace ev {
 void CheckOpenGLError(const char* stmt, const char* fname, int line) {
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
@@ -80,3 +80,4 @@ GLuint LoadProgram(const char* vertex_path, const char* fragment_path) {
 
   return program;
 }
+}  // namespace ev

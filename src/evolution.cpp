@@ -2,7 +2,7 @@
 #include <armadillo>
 
 using namespace arma;
-
+namespace ev {
 Evolutor::Evolutor() {}
 
 Generation Evolutor::generate_fresh_generation(const int population) {
@@ -64,3 +64,4 @@ Generation Evolutor::breed_next_generation(const Generation generation,
 std::vector<float>& Evolutor::get_max_fitness_plot() {
   return m_generational_best_fitness;
 }
+}  // namespace ev

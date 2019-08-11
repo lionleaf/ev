@@ -1,10 +1,10 @@
 #pragma once
-#include "ev_math.h"
-#include <vector>
 #include <glad/glad.h>
+#include <vector>
+#include "ev_math.h"
 // GLFW must be included after glad.h
 #include <GLFW/glfw3.h>
-
+namespace ev {
 namespace ev_ui {
 
 // Called once to init
@@ -18,7 +18,7 @@ void start_frame();
 // other parts of the UI can be drawn in different functions
 // called from different locations
 void main_ui();
-  
+
 void camera_control(Vec2f& pos);
 
 void generation_info(int nr, int creature_nr, std::vector<float> fitness);
@@ -30,3 +30,4 @@ void draw();
 void destroy();
 
 }  // namespace ev_ui
+}  // namespace ev

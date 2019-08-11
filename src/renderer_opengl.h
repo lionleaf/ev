@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
 #include "common.h"
-
+namespace ev {
 struct Camera {
   glm::vec3 pos{};
   glm::vec3 look_at{};
@@ -14,17 +14,17 @@ struct Camera {
 
 class OpenGLRenderer {
  public:
-  static constexpr double frame_duration = 1.0 / 30.0;
+  static constexpr double frame_duration = 1.0 / 60.0;
   OpenGLRenderer();
   ~OpenGLRenderer();
   void start_frame();
   void end_frame();
   void draw_creature(Creature& creature);
   void draw_body(const Body& body);
-  void draw_circle(Circle circle, Vec2f offset);
-  void draw_rect(AABB rect, Vec2f offset);
+  void draw_circle(Circle circle, Vec2f offset, float rotation);
+  void draw_polygon(const Polygon& polygon, Vec2f offset, float rotation);
 
-  void scroll_callback(GLFWwindow* window, double offset);
+  void scroll_callback(GLFWwindow* window, float offset);
 
   bool should_close();
 
@@ -49,3 +49,4 @@ class OpenGLRenderer {
 
   GLuint setup_quad();
 };
+}  // namespace ev

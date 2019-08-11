@@ -4,8 +4,8 @@
 #include "common.h"
 #include "physics_2d.h"
 
+namespace ev {
 using std::vector;
-
 class Evolutor {
  public:
   Evolutor();
@@ -18,3 +18,4 @@ class Evolutor {
  private:
   vector<float> m_generational_best_fitness{};
 };
+}  // namespace ev

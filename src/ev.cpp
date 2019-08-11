@@ -4,6 +4,7 @@
 
 using namespace std::chrono;
 
+namespace ev {
 Ev::Ev() {}
 
 void Ev::main_loop() {
@@ -35,7 +36,7 @@ void Ev::main_loop() {
   Creature* visible_creature{};
   while (!m_renderer.should_close()) {
     // Keep the invisible simulations running as fast as possible
-    if (challenge.step(simulation_dt)) {
+    /*if (challenge.step(simulation_dt)) {
       fitness[simulated_creatures] = challenge.get_fitness();
 
       ++simulated_creatures;
@@ -46,7 +47,7 @@ void Ev::main_loop() {
       }
       // Current simulation done! Switch to next one.
       challenge.reset(generation.dna[simulated_creatures]);
-    }
+    }*/
 
     // This loop is hopefully running significantly faster than the render rate
     high_resolution_clock::time_point now = high_resolution_clock::now();
@@ -77,8 +78,10 @@ void Ev::main_loop() {
   }
 }
 
-void Ev::render_world(phys_2d::World& world) {
+void Ev::render_world(phys::World& world) {
   for (Body* body : world.objects()) {
     m_renderer.draw_body(*body);
   }
 }
+
+}  // namespace ev

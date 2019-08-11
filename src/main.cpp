@@ -4,6 +4,17 @@
 #include <vector>
 #include "ev.h"
 
+int main() {
+  // TODO:  move this somewhere else
+
+  auto ev = ev::Ev{};
+
+  ev.main_loop();
+
+  return 0;
+}
+
+namespace ev {
 using namespace std;
 using namespace std::chrono;
 
@@ -26,14 +37,5 @@ void perf_experiment() {
   cout << (duration / 1000.0f) << endl;
 }
 
-int main() {
-  // TODO:  move this somewhere else
-
-  auto ev = Ev{};
-
-  ev.main_loop();
-
-  return 0;
-}
-
 void main_loop() {}
+}  // namespace ev
