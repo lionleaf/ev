@@ -1,9 +1,10 @@
 #pragma once
 #include <math.h>
 namespace ev {
-struct Vec2f {
-  float x;
-  float y;
+using real = double;
+struct Vec2 {
+  real x;
+  real y;
 
   void inline normalize() {
     double len = sqrt(x * x + y * y);
@@ -11,18 +12,18 @@ struct Vec2f {
       x = 0.0f;
       y = 0.0f;
     } else {
-      x *= static_cast<float>(1.0f / len);
-      y *= static_cast<float>(1.0f / len);
+      x *= static_cast<real>(1.0f / len);
+      y *= static_cast<real>(1.0f / len);
     }
   }
 
-  double inline length_squared() { return (x * x + y * y); }
+  double inline length_squared() const { return (x * x + y * y); }
 
   // Returns a copy of the vector with the rotation applied
-  Vec2f inline with_rotation(float rotation_radians) const {
-    float sn = static_cast<float>(sin(rotation_radians));
-    float cs = static_cast<float>(cos(rotation_radians));
-    return Vec2f{x * cs - y * sn, x * sn + y * cs};
+  Vec2 inline with_rotation(real rotation_radians) const {
+    real sn = static_cast<real>(sin(rotation_radians));
+    real cs = static_cast<real>(cos(rotation_radians));
+    return Vec2{x * cs - y * sn, x * sn + y * cs};
   }
 
   void inline abs() {
@@ -31,104 +32,110 @@ struct Vec2f {
   }
 
   // Rotates vector in-place
-  void inline rotate(float rotation_radians) {
-    float sn = static_cast<float>(sin(rotation_radians));
-    float cs = static_cast<float>(cos(rotation_radians));
+  void inline rotate(real rotation_radians) {
+    real sn = static_cast<real>(sin(rotation_radians));
+    real cs = static_cast<real>(cos(rotation_radians));
 
-    float new_x = x * cs - y * sn;  // old x is used to calculate y, use temp
+    real new_x = x * cs - y * sn;  // old x is used to calculate y, use temp
     y = x * sn + y * cs;
     x = new_x;
   }
 
-  bool operator==(const Vec2f& a) { return (x == a.x && y == a.y); }
+  bool operator==(const Vec2& a) { return (x == a.x && y == a.y); }
 
-  Vec2f inline operator=(Vec2f a) {
+  Vec2 inline operator=(Vec2 a) {
     x = a.x;
     y = a.y;
     return a;
   }
 
-  inline Vec2f& operator+=(const Vec2f& a) {
+  inline Vec2& operator*=(const real& a) {
+    x *= a;
+    y *= a;
+    return *this;
+  }
+
+  inline Vec2& operator+=(const Vec2& a) {
     x += a.x;
     y += a.y;
     return *this;
   }
-  inline Vec2f& operator-=(const Vec2f& a) {
+  inline Vec2& operator-=(const Vec2& a) {
     x -= a.x;
     y -= a.y;
     return *this;
   }
-  float inline operator*(Vec2f a) { return a.x * x + a.y * y; }
+  real inline operator*(Vec2 a) { return a.x * x + a.y * y; }
 };
 
-Vec2f inline operator+(Vec2f lhs, const Vec2f& rhs) {
+Vec2 inline operator+(Vec2 lhs, const Vec2& rhs) {
   lhs += rhs;
   return lhs;
 }
 
-Vec2f inline operator-(Vec2f lhs, const Vec2f& rhs) {
+Vec2 inline operator-(Vec2 lhs, const Vec2& rhs) {
   lhs -= rhs;
   return lhs;
 }
 
-Vec2f inline operator-(Vec2f vec) {
+Vec2 inline operator-(Vec2 vec) {
   vec.x = -vec.x;
   vec.y = -vec.y;
   return vec;
 }
 
 struct AABB {
-  Vec2f min;
-  Vec2f max;
-  AABB(Vec2f min, Vec2f max) : min{min}, max{max} {}
+  Vec2 min;
+  Vec2 max;
+  AABB(Vec2 min, Vec2 max) : min{min}, max{max} {}
 };
 
-float inline squared_distance(Vec2f a, Vec2f b) {
+real inline squared_distance(Vec2 a, Vec2 b) {
   auto x = (a.x - b.x);
   auto y = (a.y - b.y);
   return x * x + y * y;
 }
 
-float inline squared_length(Vec2f a) {
+real inline squared_length(Vec2 a) {
   return a.x * a.x + a.y * a.y;
 }
 
-float inline distance(Vec2f a, Vec2f b) {
-  float x = (a.x - b.x);
-  float y = (a.y - b.y);
-  return static_cast<float>(sqrt(x * x + y * y));
+real inline distance(Vec2 a, Vec2 b) {
+  real x = (a.x - b.x);
+  real y = (a.y - b.y);
+  return static_cast<real>(sqrt(x * x + y * y));
 }
 
-float inline dot_product(Vec2f a, Vec2f b) {
+real inline dot_product(Vec2 a, Vec2 b) {
   return a.x * b.x + a.y * b.y;
 }
 
-float inline cross_product(const Vec2f& a, const Vec2f& b) {
+real inline cross_product(const Vec2& a, const Vec2& b) {
   return a.x * b.y - a.y * b.x;
 }
 
 // Note that the result of a 2D scalar cross product is order dependent
-auto inline cross_product(const Vec2f& a, float s) {
-  return Vec2f{s * a.y, -s * a.x};
+auto inline cross_product(const Vec2& a, real s) {
+  return Vec2{s * a.y, -s * a.x};
 }
 
-auto inline cross_product(float s, const Vec2f& a) {
-  return Vec2f{-s * a.y, s * a.x};
+auto inline cross_product(real s, const Vec2& a) {
+  return Vec2{-s * a.y, s * a.x};
 }
 
-Vec2f inline operator*(Vec2f b, float a) {
+Vec2 inline operator*(Vec2 b, real a) {
   return {a * b.x, a * b.y};
 }
 
-Vec2f inline operator*(float a, Vec2f b) {
+Vec2 inline operator*(real a, Vec2 b) {
   return {a * b.x, a * b.y};
 }
 
-Vec2f inline operator/(Vec2f a, float b) {
+Vec2 inline operator/(Vec2 a, real b) {
   return {a.x / b, a.y / b};
 }
 
-Vec2f inline operator/(float a, Vec2f b) {
+Vec2 inline operator/(real a, Vec2 b) {
   return {a / b.x, a / b.y};
 }
 }  // namespace ev

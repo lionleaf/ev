@@ -4,6 +4,9 @@
 #include <vector>
 #include "ev.h"
 
+#include <float.h>
+unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
+
 int main() {
   // TODO:  move this somewhere else
 
@@ -18,10 +21,10 @@ namespace ev {
 using namespace std;
 using namespace std::chrono;
 
-float perfTestFunction() {
-  float result = 0;
-  Vec2f a{0.5, 200.5};
-  Vec2f b{5, 290.5};
+real perfTestFunction() {
+  real result = 0;
+  Vec2 a{0.5, 200.5};
+  Vec2 b{5, 290.5};
   for (int i = 0; i < 100; i++) {
     result += distance(a, b);
   }

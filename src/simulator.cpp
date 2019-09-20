@@ -5,12 +5,13 @@ namespace ev {
 WalkingChallenge::WalkingChallenge(CreatureDNA creatureDNA,
                                    int seconds,
                                    int nr_bodies) {
+  m_nr_bodies = nr_bodies;
   m_iterations_to_complete = 30 * seconds;
   m_creature = Creature{creatureDNA};
 
   m_world.add(&m_ground);
   m_world.add(&m_creature.body());
-  // m_world.add_random_bodies(nr_bodies);
+  m_world.add_random_bodies(nr_bodies);
 }
 
 bool WalkingChallenge::step(float dt) {
@@ -22,7 +23,7 @@ bool WalkingChallenge::step(float dt) {
   return m_num_iterations == m_iterations_to_complete;
 }
 
-float WalkingChallenge::get_fitness() {
+real WalkingChallenge::get_fitness() {
   assert(m_num_iterations == m_iterations_to_complete);
   return -m_creature.body().m_pos.x;
 }
@@ -35,6 +36,7 @@ void WalkingChallenge::reset(CreatureDNA new_creatureDNA) {
 
   m_world.add(&m_ground);
   m_world.add(&m_creature.body());
+  m_world.add_random_bodies(m_nr_bodies);
 }
 
 phys::World& WalkingChallenge::getWorld() {

@@ -19,7 +19,7 @@ void start_frame();
 // called from different locations
 void main_ui();
 
-void camera_control(Vec2f& pos);
+void camera_control(Vec2& pos);
 
 void generation_info(int nr, int creature_nr, std::vector<float> fitness);
 

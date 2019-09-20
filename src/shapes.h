@@ -4,37 +4,39 @@
 #include <vector>
 #include "ev_math.h"
 namespace ev {
+using std::tuple;
 
 class Body;
 
 class Polygon {
  private:
-  float m_rotation{};
-  float m_mass{};
-  float m_moment_of_inertia{};
+  real m_rotation{};
 
-  void compute_mass(float density);
   void compute_face_normals();
 
  public:
-  Polygon(std::vector<Vec2f> vertices, float rotation_rad = 0.0f);
-  Polygon(float half_width, float half_height, float rotation_rad = 0.0f);
-  Vec2f getExtremePoint(Vec2f dir);
-  float inline mass() const { return m_mass; }
-  float inline rotation() const { return m_rotation; }
-  Vec2f inline vertex(int index) const { return m_vertices[index]; }
-  Vec2f inline normal(int index) const { return m_normals[index]; }
+  Polygon(std::vector<Vec2> vertices, real rotation_rad = 0.0f);
+  Polygon(real half_width, real half_height, real rotation_rad = 0.0f);
+  Vec2 getExtremePoint(Vec2 dir);
+  real inline rotation() const { return m_rotation; }
+  Vec2 inline vertex(int index) const { return m_vertices[index]; }
+  Vec2 inline normal(int index) const { return m_normals[index]; }
   size_t inline vertex_count() const { return m_vertices.size(); }
 
-  std::vector<Vec2f> m_vertices{};
-  std::vector<Vec2f> m_normals{};
-  Vec2f m_pos{};
+  std::vector<Vec2> m_vertices{};
+  std::vector<Vec2> m_normals{};
+  Vec2 m_pos{};
   Body* m_body;
+
+  // Returns {mass, angular_mass} tuple
+  tuple<real, real> compute_mass(real density);
 };
 
 class Circle {
  public:
-  float radius;
-  Vec2f pos;
+  real radius;
+  Vec2 pos;
+  real compute_mass(real density);
+  real compute_angular_mass(real mass);
 };
 }  // namespace ev

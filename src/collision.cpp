@@ -6,7 +6,7 @@
 namespace ev {
 namespace phys {
 
-Vec2f point_to_world(Vec2f point, const Polygon& poly, const Body& body) {
+Vec2 point_to_world(Vec2 point, const Polygon& poly, const Body& body) {
   point.rotate(poly.rotation());
   point += poly.m_pos;
   point.rotate(body.m_orientation);
@@ -15,7 +15,7 @@ Vec2f point_to_world(Vec2f point, const Polygon& poly, const Body& body) {
   return point;
 }
 
-Vec2f point_from_world(Vec2f point, const Polygon& poly, const Body& body) {
+Vec2 point_from_world(Vec2 point, const Polygon& poly, const Body& body) {
   point -= body.m_pos;  // world space
   point.rotate(-body.m_orientation);
   point -= poly.m_pos;
@@ -24,40 +24,45 @@ Vec2f point_from_world(Vec2f point, const Polygon& poly, const Body& body) {
   return point;
 }
 
+inline bool biased_greater_than(real a, real b) {
+  const real k_biasRelative = 0.95f;
+  const real k_biasAbsolute = 0.01f;
+  return a >= b * k_biasRelative + a * k_biasAbsolute;
+}
 // For directional vectors, like normals, we don't want to translate them
-Vec2f dir_to_world(Vec2f point, const Polygon& poly, const Body& body) {
+Vec2 dir_to_world(Vec2 point, const Polygon& poly, const Body& body) {
   point.rotate(poly.rotation());
   point.rotate(body.m_orientation);
 
   return point;
 }
 
-Vec2f dir_from_world(Vec2f point, const Polygon& poly, const Body& body) {
+Vec2 dir_from_world(Vec2 point, const Polygon& poly, const Body& body) {
   point.rotate(-body.m_orientation);
   point.rotate(-poly.rotation());
 
   return point;
 }
 
-std::pair<float, uint32> find_axis_of_least_penetration(Polygon& a,
-                                                        Body& body_a,
-                                                        Polygon& b,
-                                                        Body& body_b) {
-  float best_distance = -std::numeric_limits<float>::infinity();
+std::pair<real, uint32> find_axis_of_least_penetration(Polygon& a,
+                                                       Body& body_a,
+                                                       Polygon& b,
+                                                       Body& body_b) {
+  real best_distance = -std::numeric_limits<real>::infinity();
   uint32 best_index;
 
   for (uint32 i = 0; i < a.vertex_count(); ++i) {
-    Vec2f normal = a.normal(i);
-    Vec2f a_normal_b_space = dir_to_world(normal, a, body_a);
+    Vec2 normal = a.normal(i);
+    Vec2 a_normal_b_space = dir_to_world(normal, a, body_a);
     a_normal_b_space = dir_from_world(a_normal_b_space, b, body_b);
 
-    Vec2f extreme = b.getExtremePoint(-a_normal_b_space);
+    Vec2 extreme = b.getExtremePoint(-a_normal_b_space);
 
     // Get current vertex from a in b model space
-    Vec2f v = point_to_world(a.vertex(i), a, body_a);
+    Vec2 v = point_to_world(a.vertex(i), a, body_a);
     v = point_from_world(v, b, body_b);
 
-    float pen_dist = dot_product(a_normal_b_space, extreme - v);
+    real pen_dist = dot_product(a_normal_b_space, extreme - v);
 
     if (pen_dist > best_distance) {
       best_distance = pen_dist;
@@ -73,14 +78,14 @@ uint32 find_incident_face(Polygon& ref_poly,
                           Polygon& inc_poly,
                           Body& inc_body,
                           uint32 ref_index) {
-  Vec2f ref_normal =
+  Vec2 ref_normal =
       dir_to_world(ref_poly.normal(ref_index), ref_poly, ref_body);
   ref_normal = dir_from_world(ref_normal, inc_poly, inc_body);
 
   uint32 incident_face = 0;
-  float min_dot = std::numeric_limits<float>::infinity();
+  real min_dot = std::numeric_limits<real>::infinity();
   for (uint32 i = 0; i < inc_poly.vertex_count(); ++i) {
-    float dot = dot_product(ref_normal, inc_poly.normal(i));
+    real dot = dot_product(ref_normal, inc_poly.normal(i));
     if (dot < min_dot) {
       min_dot = dot;
       incident_face = i;
@@ -90,12 +95,12 @@ uint32 find_incident_face(Polygon& ref_poly,
   return incident_face;
 }
 
-uint32 clip(Vec2f n, float c, Vec2f* face) {
+uint32 clip(Vec2 n, real c, Vec2* face) {
   uint32 clipped = 0;
-  Vec2f out[2] = {face[0], face[1]};
+  Vec2 out[2] = {face[0], face[1]};
 
-  float d1 = dot_product(n, out[0]) - c;
-  float d2 = dot_product(n, out[1]) - c;
+  real d1 = dot_product(n, out[0]) - c;
+  real d2 = dot_product(n, out[1]) - c;
 
   // If negative (behind plane) clip
   if (d1 <= 0.0f)
@@ -107,7 +112,7 @@ uint32 clip(Vec2f n, float c, Vec2f* face) {
   if (d1 * d2 < 0.0f)  // less than to ignore -0.0f
   {
     // Push interesection point
-    float alpha = d1 / (d1 - d2);
+    real alpha = d1 / (d1 - d2);
     out[clipped] = face[0] + alpha * (face[1] - face[0]);
     ++clipped;
   }
@@ -123,7 +128,7 @@ uint32 clip(Vec2f n, float c, Vec2f* face) {
 bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
   // Based on the theorem of axis of separation
   uint32 face_a{};
-  float penetration_a{};
+  real penetration_a{};
   std::tie(penetration_a, face_a) = find_axis_of_least_penetration(
       a, collision_data.body_a, b, collision_data.body_b);
 
@@ -132,7 +137,7 @@ bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
   }
 
   uint32 face_b{};
-  float penetration_b{};
+  real penetration_b{};
   std::tie(penetration_b, face_b) = find_axis_of_least_penetration(
       b, collision_data.body_b, a, collision_data.body_a);
 
@@ -148,7 +153,7 @@ bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
   Polygon* incident_poly;
   Body* incident_body;
 
-  if (penetration_a >= penetration_b) {
+  if (biased_greater_than(penetration_a, penetration_b)) {
     flip = false;
     ref_poly = &a;
     ref_body = &collision_data.body_a;
@@ -168,9 +173,11 @@ bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
       *ref_poly, *ref_body, *incident_poly, *incident_body, ref_index);
 
   int if0_i = incident_face_index;
-  int if1_i = if0_i + 1 >= incident_poly->m_vertices.size() ? 0 : if0_i + 1;
-  Vec2f incident_face[2] = {incident_poly->m_vertices[if0_i],
-                            incident_poly->m_vertices[if1_i]};
+  int if1_i = if0_i + 1 >= static_cast<int>(incident_poly->m_vertices.size())
+                  ? 0
+                  : if0_i + 1;
+  Vec2 incident_face[2] = {incident_poly->m_vertices[if0_i],
+                           incident_poly->m_vertices[if1_i]};
 
   incident_face[0] =
       point_to_world(incident_face[0], *incident_poly, *incident_body);
@@ -179,45 +186,46 @@ bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
       point_to_world(incident_face[1], *incident_poly, *incident_body);
 
   int rf0_i = ref_index;
-  int rf1_i = rf0_i + 1 >= ref_poly->m_vertices.size() ? 0 : rf0_i + 1;
-  Vec2f ref_face[2] = {ref_poly->m_vertices[rf0_i],
-                       ref_poly->m_vertices[rf1_i]};
+  int rf1_i = rf0_i + 1 >= static_cast<int>(ref_poly->m_vertices.size())
+                  ? 0
+                  : rf0_i + 1;
+  Vec2 ref_face[2] = {ref_poly->m_vertices[rf0_i], ref_poly->m_vertices[rf1_i]};
 
-  Vec2f ref_v0_world = point_to_world(ref_face[0], *ref_poly, *ref_body);
-  Vec2f ref_v1_world = point_to_world(ref_face[1], *ref_poly, *ref_body);
+  Vec2 ref_v0_world = point_to_world(ref_face[0], *ref_poly, *ref_body);
+  Vec2 ref_v1_world = point_to_world(ref_face[1], *ref_poly, *ref_body);
 
-  Vec2f ref_face_tangent = (ref_v1_world - ref_v0_world);
+  Vec2 ref_face_tangent = (ref_v1_world - ref_v0_world);
   ref_face_tangent.normalize();
 
-  auto ref_face_normal = Vec2f{ref_face_tangent.y, -ref_face_tangent.x};
+  auto ref_face_normal = Vec2{ref_face_tangent.y, -ref_face_tangent.x};
 
   // To get distance of line from origin we can project the vector from
   // the origin to ref_v0_world onto the normal and divide by length of
   // the normal (1). Simplifies to a single dot_product
   // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof
-  float ref_dist_from_origin = dot_product(ref_face_normal, ref_v0_world);
+  real ref_dist_from_origin = dot_product(ref_face_normal, ref_v0_world);
 
   // Distance from v0 and v1 to the point on the line closest to the origin?
-  float neg_side = -dot_product(ref_face_tangent, ref_v0_world);
-  float pos_side = dot_product(ref_face_tangent, ref_v1_world);
+  real neg_side = -dot_product(ref_face_tangent, ref_v0_world);
+  real pos_side = dot_product(ref_face_tangent, ref_v1_world);
 
   if (clip(-ref_face_tangent, neg_side, incident_face) < 2) {
-    return false;  // Can apparently happen due to floating point errors?
+    return false;  // Can apparently happen due to realing point errors?
   }
 
   if (clip(ref_face_tangent, pos_side, incident_face) < 2) {
-    return false;  // Can apparently happen due to floating point errors?
+    return false;  // Can apparently happen due to realing point errors?
   }
 
-  collision_data.normal = !flip ? -ref_face_normal : ref_face_normal;
+  collision_data.normal = flip ? -ref_face_normal : ref_face_normal;
 
   // Only keep points behind reference face
   uint32 contact_points = 0;
-  float separation =
+  real separation =
       dot_product(ref_face_normal, incident_face[0]) - ref_dist_from_origin;
 
-  if (separation <= 0.0f) {
-    // collision_data.contacts[contact_points] = incident_face[0]
+  if (separation <= 0.1f) {
+    collision_data.contacts[contact_points] = incident_face[0];
     collision_data.penetration_depth = -separation;
     ++contact_points;
   } else {
@@ -227,13 +235,14 @@ bool polygon_vs_polygon(Polygon a, Polygon b, CollisionData& collision_data) {
   separation =
       dot_product(ref_face_normal, incident_face[1]) - ref_dist_from_origin;
 
-  if (separation <= 0.0f) {
-    // collision_data.contacts[contact_points] = incident_face[1]
+  if (separation <= 0.1f) {
+    collision_data.contacts[contact_points] = incident_face[1];
     collision_data.penetration_depth += -separation;
     ++contact_points;
-    collision_data.penetration_depth /= static_cast<float>(contact_points);
+    collision_data.penetration_depth /= static_cast<real>(contact_points);
   }
-  // collision_data.contact_count = contact_points
+
+  collision_data.contact_count = contact_points;
   return true;
 }
 
@@ -241,7 +250,7 @@ bool polygon_vs_circle(Polygon a, Circle b, CollisionData& collision_data) {
   return false;
 }
 
-Vec2f component_clamp(Vec2f min, Vec2f max, Vec2f vec) {
+Vec2 component_clamp(Vec2 min, Vec2 max, Vec2 vec) {
   // Clamps each component of vec between min and max
   // Since vec is passed by value we can just modify and return the local copy
   vec.x = vec.x < min.x ? min.x : vec.x;
@@ -254,10 +263,10 @@ Vec2f component_clamp(Vec2f min, Vec2f max, Vec2f vec) {
 
 bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
   auto aabb_extent = (aabb.max - aabb.min) / 2.0f;
-  Vec2f pos_aabb = collision_data.body_a.m_pos + aabb.min +
-                   aabb_extent;  // Center of aabb in world space
-  Vec2f pos_circle = collision_data.body_b.m_pos +
-                     circle.pos;  // Center of circle in world space
+  Vec2 pos_aabb = collision_data.body_a.m_pos + aabb.min +
+                  aabb_extent;  // Center of aabb in world space
+  Vec2 pos_circle = collision_data.body_b.m_pos +
+                    circle.pos;  // Center of circle in world space
   auto aabb_to_circle = pos_circle - pos_aabb;
 
   // Compute closest point on the AABB to the circle
@@ -321,10 +330,10 @@ bool AABB_vs_AABB(AABB relative_a,
   bbox.min += collision_data.body_b.m_pos;
   bbox.max += collision_data.body_b.m_pos;
 
-  Vec2f a_half_extent = (abox.max - abox.min) / 2.0f;
-  Vec2f b_half_extent = (bbox.max - bbox.min) / 2.0f;
+  Vec2 a_half_extent = (abox.max - abox.min) / 2.0f;
+  Vec2 b_half_extent = (bbox.max - bbox.min) / 2.0f;
 
-  Vec2f a_to_b = (bbox.min + b_half_extent) - (abox.min + a_half_extent);
+  Vec2 a_to_b = (bbox.min + b_half_extent) - (abox.min + a_half_extent);
 
   //     ----------      -----------------
   //     |        |      |               |
@@ -332,12 +341,12 @@ bool AABB_vs_AABB(AABB relative_a,
   //     |        |      |               |
   //     ----------      -----------------
 
-  float x_overlap = a_half_extent.x + b_half_extent.x - abs(a_to_b.x);
+  real x_overlap = a_half_extent.x + b_half_extent.x - abs(a_to_b.x);
   if (x_overlap <= 0) {
     return false;
   }
 
-  float y_overlap = a_half_extent.y + b_half_extent.y - abs(a_to_b.y);
+  real y_overlap = a_half_extent.y + b_half_extent.y - abs(a_to_b.y);
   if (y_overlap <= 0) {
     return false;
   }
@@ -346,16 +355,16 @@ bool AABB_vs_AABB(AABB relative_a,
   if (x_overlap < y_overlap) {  // Least penetration in X
     collision_data.penetration_depth = x_overlap;
     if (a_to_b.x < 0) {
-      collision_data.normal = Vec2f{1, 0};
+      collision_data.normal = Vec2{1, 0};
     } else {
-      collision_data.normal = Vec2f{-1, 0};
+      collision_data.normal = Vec2{-1, 0};
     }
   } else {  // Least penetration in Y
     collision_data.penetration_depth = y_overlap;
     if (a_to_b.y < 0) {
-      collision_data.normal = Vec2f{0, 1};
+      collision_data.normal = Vec2{0, 1};
     } else {
-      collision_data.normal = Vec2f{0, -1};
+      collision_data.normal = Vec2{0, -1};
     }
   }
   return true;
@@ -364,13 +373,13 @@ bool AABB_vs_AABB(AABB relative_a,
 bool circle_vs_circle(Circle circle_a,
                       Circle circle_b,
                       CollisionData& collision_data) {
-  Vec2f a_pos =
+  Vec2 a_pos =
       collision_data.body_a.m_pos + circle_a.pos;  // Positions are additive
-  Vec2f b_pos =
+  Vec2 b_pos =
       collision_data.body_b.m_pos + circle_b.pos;  // Positions are additive
 
   // Test intersection
-  float combined_r = circle_a.radius + circle_b.radius;
+  real combined_r = circle_a.radius + circle_b.radius;
   combined_r *= combined_r;
 
   if (combined_r < squared_distance(a_pos, b_pos)) {
@@ -378,13 +387,13 @@ bool circle_vs_circle(Circle circle_a,
   }
 
   // Calculate collision normal
-  Vec2f unormalized = a_pos - b_pos;
-  float len = sqrt(pow(unormalized.x, 2) + pow(unormalized.y, 2));
+  Vec2 unormalized = a_pos - b_pos;
+  real len = sqrt(pow(unormalized.x, 2) + pow(unormalized.y, 2));
   if (len == 0.0f) {
     collision_data.normal =
-        Vec2f{1.0f, 0.0f};  // Total overlap, arbitrary normal
+        Vec2{1.0f, 0.0f};  // Total overlap, arbitrary normal
   } else {
-    collision_data.normal = Vec2f{unormalized.x / len, unormalized.y / len};
+    collision_data.normal = Vec2{unormalized.x / len, unormalized.y / len};
   }
 
   // Calculate penetration depth used to avoid sinking.
@@ -396,67 +405,99 @@ bool circle_vs_circle(Circle circle_a,
 void resolve_collision(CollisionData& collision_data) {
   Body& A = collision_data.body_a;
   Body& B = collision_data.body_b;
-  Vec2f normal = collision_data.normal;
+  Vec2 normal = collision_data.normal;
 
-  Vec2f relative_velocity = A.m_velocity - B.m_velocity;
+  // Snapshot the state. Since we are moving the objects
+  // around we want the math to be based on the same position for
+  // both contact points.
+  Vec2 a_pos = A.m_pos;
+  Vec2 a_vel = A.m_velocity;
+  real a_ang_vel = A.m_angular_velocity;
+  Vec2 b_pos = B.m_pos;
+  Vec2 b_vel = B.m_velocity;
+  real b_ang_vel = B.m_angular_velocity;
 
-  float vel_along_normal = dot_product(relative_velocity, normal);
+  for (int i = 0; i < collision_data.contact_count; ++i) {
+    // Distance from contact point to center of mass (COM) of A and B
+    Vec2 a_COM_to_contact = collision_data.contacts[i] - a_pos;
+    Vec2 b_COM_to_contact = collision_data.contacts[i] - a_pos;
 
-  if (vel_along_normal > 0) {
-    return;  // Objects already moving apart
+    // Relative velocity of the contact points (including rotation)
+    // Velocity of B in A space
+    Vec2 relative_velocity = b_vel +
+                             cross_product(b_ang_vel, b_COM_to_contact) -
+                             a_vel - cross_product(a_ang_vel, a_COM_to_contact);
+
+    real contact_velocity = dot_product(relative_velocity, normal);
+
+    if (contact_velocity > 0) {
+      return;  // Objects already moving apart
+    }
+
+    real a_cross_normal_sqr = cross_product(a_COM_to_contact, normal);
+    a_cross_normal_sqr *= a_cross_normal_sqr;
+    real b_cross_normal_sqr = cross_product(b_COM_to_contact, normal);
+    b_cross_normal_sqr *= b_cross_normal_sqr;
+
+    real impedance_sum_inv = A.mass_inv() + B.mass_inv() +
+                             a_cross_normal_sqr * A.angular_mass_inv() +
+                             b_cross_normal_sqr * B.angular_mass_inv();
+
+    real restitution = fmin(A.restitution, B.restitution);
+
+    real magic_restitution_nr = 0.17f;  // If the speed is low, do a resting
+                                        // collision with no restitution
+    if (relative_velocity.length_squared() < magic_restitution_nr) {
+      restitution = 0.0f;
+    }
+
+    real impulse_magnitude = -(1 + restitution) * contact_velocity;
+    impulse_magnitude /= impedance_sum_inv;
+    impulse_magnitude /= static_cast<real>(collision_data.contact_count);
+
+    Vec2 impulse = impulse_magnitude * normal;
+    A.apply_impulse(-impulse, a_COM_to_contact);
+    B.apply_impulse(impulse, b_COM_to_contact);
+
+    // Friction impulse calculation
+    Vec2 tangent =
+        relative_velocity - dot_product(relative_velocity, normal) * normal;
+    tangent.normalize();
+
+    real friction_impulse_mag = -dot_product(relative_velocity, tangent);
+    friction_impulse_mag /= impedance_sum_inv;
+    friction_impulse_mag /= static_cast<real>(collision_data.contact_count);
+
+    // skip tiny friction impulses
+    if (abs(friction_impulse_mag) > 0.0001f) {
+      real static_friction = 0.5f;   // TODO: Should be material property
+      real dynamic_friction = 0.3f;  // TODO: Should be material property
+
+      Vec2 friction_impulse{};
+
+      // Coulomb's Law  (inequality):
+      if (abs(friction_impulse_mag) < static_friction * impulse_magnitude) {
+        friction_impulse = tangent * friction_impulse_mag;
+      } else {
+        friction_impulse = -impulse_magnitude * tangent * dynamic_friction;
+      }  // TODO: Research if this is actually a legit way to do friction
+      // A.apply_impulse(-friction_impulse, a_COM_to_contact);
+      // B.apply_impulse(friction_impulse, b_COM_to_contact);
+    }
   }
 
-  float restitution = fmin(A.restitution, B.restitution);
-
-  float a_inv_mass = A.mass == 0.0f ? 0.0f : 1.0f / A.mass;  // TODO: Precalc
-  float b_inv_mass = B.mass == 0.0f ? 0.0f : 1.0f / B.mass;
-
-  float impulse_magnitude = -(1 + restitution) * vel_along_normal;
-  impulse_magnitude /= (a_inv_mass + b_inv_mass);
-
-  Vec2f impulse = impulse_magnitude * normal;
-
-  A.m_velocity += a_inv_mass * impulse;
-  B.m_velocity -= b_inv_mass * impulse;
-
   // Avoid sinking
-
   // No sink correction if it's only a tiny sinkage
-  const float epsilon = 0.01f;
   // This can be tweaked to avoid sinking and jittering during rest
-  const float correction_factor = 0.2f;
+  const real correction_factor = 0.6f;
+  const real slop = 0.01f;  // penetration allowance
 
-  Vec2f correction = (fmax(collision_data.penetration_depth - epsilon, 0.0f) /
-                      (a_inv_mass + b_inv_mass)) *
-                     (correction_factor * normal);
+  Vec2 correction = (fmax(collision_data.penetration_depth - slop, 0.0f) /
+                     (A.mass_inv() + B.mass_inv())) *
+                    (correction_factor * normal);
   // TODO: How does this work with composite bodies?
-  A.m_pos += a_inv_mass * correction;
-  B.m_pos -= b_inv_mass * correction;
-
-  // Apply friction
-  relative_velocity = A.m_velocity - B.m_velocity;  // This has changed now
-  Vec2f tangent =
-      relative_velocity - dot_product(relative_velocity, normal) * normal;
-  tangent.normalize();
-
-  float friction_impulse_magnitude =
-      dot_product(relative_velocity, tangent) * -1;
-  friction_impulse_magnitude /= (a_inv_mass + b_inv_mass);
-
-  float static_friction = 0.5f;   // TODO: Should be material property
-  float dynamic_friction = 0.3f;  // TODO: Should be material property
-
-  Vec2f friction_impulse{};
-
-  // Coulomb's Law  (inequality):
-  if (abs(friction_impulse_magnitude) < static_friction * impulse_magnitude) {
-    friction_impulse = tangent * friction_impulse_magnitude;
-  } else {
-    friction_impulse = -1 * impulse_magnitude * tangent * dynamic_friction;
-  }  // TODO: Research if this is actually a legit way to do friction
-
-  A.m_velocity += a_inv_mass * friction_impulse;
-  B.m_velocity -= b_inv_mass * friction_impulse;
+  A.m_pos -= A.mass_inv() * correction;
+  B.m_pos += B.mass_inv() * correction;
 }
 
 }  // end namespace phys

@@ -201,14 +201,14 @@ GLuint OpenGLRenderer::setup_quad() {
   return vao;
 }
 void OpenGLRenderer::draw_polygon(const Polygon& polygon,
-                                  Vec2f body_pos,
+                                  Vec2 body_pos,
                                   float rotation) {
   // Temporarily just draw a rectangle instead
-  Vec2f extent =
+  Vec2 extent =
       polygon.vertex(0) - polygon.vertex(polygon.m_vertices.size() / 2);
   extent.abs();
   extent = extent / 2.0f;
-  Vec2f pos = polygon.m_pos;
+  Vec2 pos = polygon.m_pos;
 
   auto model_to_world = glm::mat4{1.0};
   model_to_world =
@@ -238,9 +238,7 @@ void OpenGLRenderer::draw_polygon(const Polygon& polygon,
   GL(glUseProgram(0));
 }
 
-void OpenGLRenderer::draw_circle(Circle circle,
-                                 Vec2f body_pos,
-                                 float rotation) {
+void OpenGLRenderer::draw_circle(Circle circle, Vec2 body_pos, float rotation) {
   /* A lot of this code should be split into init
    * and tear-down code. But for now this makes
    * for easier reading even if it duplicates work*/
@@ -274,14 +272,14 @@ void OpenGLRenderer::draw_circle(Circle circle,
 }
 
 /*void OpenGLRenderer::draw_rect(const Rect& rect,
-                               Vec2f body_pos,
+                               Vec2 body_pos,
                                float rotation) {
   // A lot of this code should be split into init
   // and tear-down code. But for now this makes
   //  for easier reading even if it duplicates work
 
-  Vec2f extent = rect.m_extent / 2.0f;
-  Vec2f pos = rect.m_pos;
+  Vec2 extent = rect.m_extent / 2.0f;
+  Vec2 pos = rect.m_pos;
 
   auto model_to_world = glm::mat4{1.0};
   model_to_world =
@@ -316,11 +314,11 @@ void OpenGLRenderer::draw_creature(Creature& creature) {
 }
 
 void OpenGLRenderer::draw_body(const Body& body) {
-  for (Polygon polygon : body.polygons) {
+  for (Polygon polygon : body.m_polygons) {
     draw_polygon(polygon, body.m_pos, body.m_orientation);
   }
 
-  for (const Circle circle : body.circles) {
+  for (const Circle circle : body.m_circles) {
     draw_circle(circle, body.m_pos, body.m_orientation);
   }
 }

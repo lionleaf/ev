@@ -21,9 +21,8 @@ void generation_info(int nr, int creature_nr, std::vector<float> fitness) {
   ImGui::End();
 }
 
-void camera_control(Vec2f& pos) {
+void camera_control(Vec2& pos) {
   ImGui::Begin("Camera");
-  ImGui::SliderFloat("x", &pos.x, -100.0f, 100.0f);
   ImGui::End();
 }
 
