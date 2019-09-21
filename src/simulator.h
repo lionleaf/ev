@@ -7,7 +7,7 @@ class WalkingChallenge {
  public:
   WalkingChallenge(CreatureDNA creatureDNA,
                    int seconds = 30,
-                   int nr_bodies = 20);
+                   int nr_bodies = 10);
   // Returns true if challenge is done
   bool step(float dt);
 

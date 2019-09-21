@@ -420,7 +420,7 @@ void resolve_collision(CollisionData& collision_data) {
   for (int i = 0; i < collision_data.contact_count; ++i) {
     // Distance from contact point to center of mass (COM) of A and B
     Vec2 a_COM_to_contact = collision_data.contacts[i] - a_pos;
-    Vec2 b_COM_to_contact = collision_data.contacts[i] - a_pos;
+    Vec2 b_COM_to_contact = collision_data.contacts[i] - b_pos;
 
     // Relative velocity of the contact points (including rotation)
     // Velocity of B in A space
@@ -481,8 +481,8 @@ void resolve_collision(CollisionData& collision_data) {
       } else {
         friction_impulse = -impulse_magnitude * tangent * dynamic_friction;
       }  // TODO: Research if this is actually a legit way to do friction
-      // A.apply_impulse(-friction_impulse, a_COM_to_contact);
-      // B.apply_impulse(friction_impulse, b_COM_to_contact);
+      A.apply_impulse(-friction_impulse, a_COM_to_contact);
+      B.apply_impulse(friction_impulse, b_COM_to_contact);
     }
   }
 

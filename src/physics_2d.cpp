@@ -19,8 +19,8 @@ void World::add_random_bodies(uint32_t nr) {
     std::unique_ptr<Body> object = std::make_unique<Body>();
     object->add_polygon(
         Polygon{real(rand() % 5) + 1.0f, real(rand() % 5) + 1.0f});
-    object->m_pos = Vec2{static_cast<real>(rand() % 10 - 5),
-                         static_cast<real>(rand() % 10)};
+    object->m_pos = Vec2{static_cast<real>(rand() % 100 - 50),
+                         static_cast<real>(rand() % 100) + 10};
     object->m_orientation = static_cast<real>((rand() % 100) / 50.0 - 1.0f);
     object->restitution = 0.1f;
     m_objects.push_back(object.get());
@@ -39,7 +39,7 @@ void World::step(float dt) {
       continue;  // inf mass
     }
     obj->m_pos += obj->m_velocity * dt;
-    obj->m_orientation += obj->m_angular_velocity;
+    obj->m_orientation += obj->m_angular_velocity * dt;
     obj->m_velocity += gravity * dt;
     obj->m_angular_velocity += obj->m_torque * obj->angular_mass_inv() * dt;
   }
