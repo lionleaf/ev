@@ -1,4 +1,5 @@
 #include "ev.h"
+#include <algorithm>
 #include <chrono>
 #include "ev_ui.h"
 
@@ -6,6 +7,11 @@ using namespace std::chrono;
 
 namespace ev {
 Ev::Ev() {}
+
+template <typename T>
+int inline max_element_index(std::vector<T> vec) {
+  return std::max_element(begin(vec), end(vec)) - begin(vec);
+}
 
 void Ev::main_loop() {
   high_resolution_clock::time_point last_tick =
@@ -25,8 +31,10 @@ void Ev::main_loop() {
   int simulated_creatures = 0;
 
   auto challenge = WalkingChallenge{generation.dna[simulated_creatures]};
-  auto visible_challenge =
-      WalkingChallenge{generation.dna[simulated_creatures]};
+  std::vector<std::shared_ptr<WalkingChallenge>> visible_challenges{};
+  for (CreatureDNA dna : generation.dna) {
+    visible_challenges.push_back(std::make_shared<WalkingChallenge>(dna));
+  }
 
   Camera camera{};
   camera.pos = glm::vec3{0, 0, 50};  // Look down -Z axis.
@@ -36,7 +44,7 @@ void Ev::main_loop() {
   Creature* visible_creature{};
   while (!m_renderer.should_close()) {
     // Keep the invisible simulations running as fast as possible
-    /*if (challenge.step(simulation_dt)) {
+    if (challenge.step(simulation_dt)) {
       fitness[simulated_creatures] = challenge.get_fitness();
 
       ++simulated_creatures;
@@ -47,7 +55,7 @@ void Ev::main_loop() {
       }
       // Current simulation done! Switch to next one.
       challenge.reset(generation.dna[simulated_creatures]);
-    }*/
+    }
 
     // This loop is hopefully running significantly faster than the render rate
     high_resolution_clock::time_point now = high_resolution_clock::now();
@@ -62,7 +70,9 @@ void Ev::main_loop() {
 
       ev_ui::generation_info(generation.generation_nr, simulated_creatures,
                              m_evolutor.get_max_fitness_plot());
-      render_world(visible_challenge.getWorld());
+      for (auto& chal : visible_challenges) {
+        render_world(chal->getWorld());
+      }
       m_renderer.end_frame();
 
       while (dt_accumulator > m_renderer.frame_duration) {
@@ -71,8 +81,10 @@ void Ev::main_loop() {
         // sure we skip frames if we're falling behind
       }
 
-      if (visible_challenge.step(simulation_dt)) {
-        visible_challenge.reset(generation.dna[simulated_creatures]);
+      for (uint32 i = 0; i < visible_challenges.size(); ++i) {
+        if (visible_challenges[i]->step(simulation_dt)) {
+          visible_challenges[i]->reset(generation.dna[i]);
+        }
       }
     }
   }

@@ -6,8 +6,8 @@ namespace ev {
 class WalkingChallenge {
  public:
   WalkingChallenge(CreatureDNA creatureDNA,
-                   int seconds = 30,
-                   int nr_bodies = 10);
+                   int seconds = 10,
+                   int nr_bodies = 0);
   // Returns true if challenge is done
   bool step(float dt);
 
@@ -19,7 +19,7 @@ class WalkingChallenge {
 
  private:
   Creature m_creature;
-  Body m_ground{{0.0f, -50.0f}, {}, Polygon{50.0f, 50.0f}, true};
+  Body m_ground{{0.0f, -50.0f}, {}, Polygon{5000.0f, 50.0f}, true};
   phys::World m_world;
   int m_num_iterations{0};
   int m_iterations_to_complete{};

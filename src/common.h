@@ -76,7 +76,7 @@ class Body {
 };
 
 struct CreatureDNA {
-  constexpr static int dna_size{5};
+  constexpr static int dna_size{3 * 4};
   real raw_dna[dna_size];
 };
 
@@ -91,12 +91,15 @@ class Creature {
   Creature(const CreatureDNA& dna);
   void reset(){};
   void update(real dt);
-  Vec2 m_gene_velocity{};
+  float m_phase[4];
+  float m_amplitudes[4];
+  float m_freqs[4];
+
   Body& body() { return m_body; };
 
  private:
   Body m_body{};
-  real m_time_accumulator{0};
+  real m_time{0};
 };
 
 }  // namespace ev

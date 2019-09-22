@@ -14,7 +14,7 @@ struct Camera {
 
 class OpenGLRenderer {
  public:
-  static constexpr double frame_duration = 1.0 / 60.0;
+  static constexpr double frame_duration = 1.0 / 30.0;
   OpenGLRenderer();
   ~OpenGLRenderer();
   void start_frame();

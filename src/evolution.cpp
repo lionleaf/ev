@@ -11,7 +11,8 @@ Generation Evolutor::generate_fresh_generation(const int population) {
   for (int i = 0; i < population; ++i) {
     auto dna = CreatureDNA{};
     for (int j = 0; j < dna.dna_size; ++j) {
-      dna.raw_dna[j] = static_cast<float>(rand() % 1000000) / 1000000.0f;
+      dna.raw_dna[j] =
+          static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     }
     generation.dna.push_back(std::move(dna));
   }
@@ -49,10 +50,10 @@ Generation Evolutor::breed_next_generation(const Generation generation,
       // Randomly pick dna from parent
       kid.raw_dna[dna_i] = rand() % 2 ? mom.raw_dna[dna_i] : dad.raw_dna[dna_i];
 
-      if (rand() % 100 < 5) {
+      if ((rand() % 100) <= 1) {
         // Mutation!
         kid.raw_dna[dna_i] +=
-            ((rand() % 1000000) / 1000000.0f) - 0.5f;  // Between -0.5 and 0.5
+            static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
       }
     }
     next_generation.dna.push_back(std::move(kid));

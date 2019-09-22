@@ -17,6 +17,7 @@ class Polygon {
  public:
   Polygon(std::vector<Vec2> vertices, real rotation_rad = 0.0f);
   Polygon(real half_width, real half_height, real rotation_rad = 0.0f);
+  void set_rect(real half_width, real half_height);
   Vec2 getExtremePoint(Vec2 dir);
   real inline rotation() const { return m_rotation; }
   Vec2 inline vertex(int index) const { return m_vertices[index]; }
@@ -26,7 +27,6 @@ class Polygon {
   std::vector<Vec2> m_vertices{};
   std::vector<Vec2> m_normals{};
   Vec2 m_pos{};
-  Body* m_body;
 
   // Returns {mass, angular_mass} tuple
   tuple<real, real> compute_mass(real density);

@@ -87,6 +87,11 @@ void Polygon::compute_face_normals() {
 }
 
 Polygon::Polygon(real half_width, real half_height, real rotation_rad) {
+  set_rect(half_width, half_height);
+  m_rotation = rotation_rad;
+}
+
+void Polygon::set_rect(real half_width, real half_height) {
   //  The m_vertices and m_normals data for a rectangle:
   //    y
   //    ^
@@ -114,9 +119,8 @@ Polygon::Polygon(real half_width, real half_height, real rotation_rad) {
   m_normals[1] = {1.0f, 0.0f};
   m_normals[2] = {0.0f, 1.0f};
   m_normals[3] = {-1.0f, 0.0f};
-
-  m_rotation = rotation_rad;
 }
+
 real Circle::compute_mass(real density) {
   // I'll let the mass scale in 3D for more realistic looking physics
   return M_PI * radius * radius * radius * density * 4.0 / 3.0;

@@ -3,26 +3,30 @@
 namespace ev {
 
 Creature::Creature() {
-  m_body.add_circle(Circle{0.5f, Vec2{0.0f, 0.0f}});
-  m_body.add_polygon(Polygon{5.5f, 0.5f});
+  for (int i = 0; i < 4; ++i) {
+    m_body.add_polygon(Polygon{5.5f, 0.5f, i * 0.785398f});
+  }
   m_body.m_angular_velocity = 0.00f;
-  m_body.m_orientation = 0.9;  // 3.14f / 4.0f;
-  m_body.restitution = 0.02f;
-  m_gene_velocity = Vec2{0.0f, 0.0f};
-  m_time_accumulator = 0.0f;
-  m_body.m_pos.y = 10.5f;
+  m_body.m_orientation = 0.0;
+  m_body.restitution = 0.2f;
+  m_time = 0.0f;
+  m_body.m_pos.y = 10.0f;
 }
 
 Creature::Creature(const CreatureDNA& dna) : Creature() {
-  m_gene_velocity = Vec2{dna.raw_dna[0], dna.raw_dna[1]};
-  m_body.m_velocity = m_gene_velocity;
+  for (int i = 0; i < 4; ++i) {
+    m_amplitudes[i] = 10.0f * dna.raw_dna[3 * i + 0];
+    m_freqs[i] = 10.0f * dna.raw_dna[3 * i + 1];
+    m_phase[i] = 3.14f * dna.raw_dna[3 * i + 2];
+  }
 }
 
 void Creature::update(real dt) {
-  m_time_accumulator += dt;
-  if (m_time_accumulator > 0.5f) {
-    m_body.m_velocity += m_gene_velocity;
-    m_time_accumulator -= 0.5f;
+  m_time += dt;
+
+  for (int i = 0; i < 4; ++i) {
+    m_body.m_polygons[i].set_rect(
+        5.5f + m_amplitudes[i] * sin(m_freqs[i] * m_time + m_phase[0]), 0.5f);
   }
 }
 Body::~Body() = default;

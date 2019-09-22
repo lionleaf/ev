@@ -4,8 +4,8 @@
 #include <vector>
 #include "ev.h"
 
-#include <float.h>
-unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
+//#include <float.h>
+// unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
 
 int main() {
   // TODO:  move this somewhere else

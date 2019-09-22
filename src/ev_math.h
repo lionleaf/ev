@@ -55,6 +55,13 @@ struct Vec2 {
     return *this;
   }
 
+  // Component-wise multiplication
+  inline Vec2& operator*=(const Vec2& a) {
+    x *= a.x;
+    y *= a.y;
+    return *this;
+  }
+
   inline Vec2& operator+=(const Vec2& a) {
     x += a.x;
     y += a.y;

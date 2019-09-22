@@ -469,9 +469,9 @@ void resolve_collision(CollisionData& collision_data) {
     friction_impulse_mag /= static_cast<real>(collision_data.contact_count);
 
     // skip tiny friction impulses
-    if (abs(friction_impulse_mag) > 0.0001f) {
-      real static_friction = 0.5f;   // TODO: Should be material property
-      real dynamic_friction = 0.3f;  // TODO: Should be material property
+    if (abs(friction_impulse_mag) > 0.0000001f) {
+      real static_friction = 0.7f;   // TODO: Should be material property
+      real dynamic_friction = 0.5f;  // TODO: Should be material property
 
       Vec2 friction_impulse{};
 

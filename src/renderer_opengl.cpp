@@ -33,6 +33,8 @@ OpenGLRenderer::OpenGLRenderer() {
   }
   glfwMakeContextCurrent(m_window);
 
+  glfwSwapInterval(0);  // turn of double-buffering (and vsync)
+
   glfwSetWindowUserPointer(m_window, this);
 
   auto scroll_callback_redirect = [](GLFWwindow* w, double offset_x,
@@ -103,25 +105,26 @@ void OpenGLRenderer::start_frame() {
 }
 
 void OpenGLRenderer::scroll_callback(GLFWwindow* window, float offset) {
-  m_camera.pos.z -= offset;
+  m_camera.pos.z -= abs(m_camera.pos.z) / 10.0 * offset;
 }
 
 void OpenGLRenderer::poll_camera_input() {
+  real speed = 3.0f;
   if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) {
-    m_camera.pos.y += 0.3f;
-    m_camera.look_at.y += 0.3f;
+    m_camera.pos.y += speed;
+    m_camera.look_at.y += speed;
   }
   if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) {
-    m_camera.pos.y -= 0.3f;
-    m_camera.look_at.y -= 0.3f;
+    m_camera.pos.y -= speed;
+    m_camera.look_at.y -= speed;
   }
   if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) {
-    m_camera.pos.x += 0.3f;
-    m_camera.look_at.x += 0.3f;
+    m_camera.pos.x += speed;
+    m_camera.look_at.x += speed;
   }
   if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) {
-    m_camera.pos.x -= 0.3f;
-    m_camera.look_at.x -= 0.3f;
+    m_camera.pos.x -= speed;
+    m_camera.look_at.x -= speed;
   }
 }
 
@@ -217,6 +220,9 @@ void OpenGLRenderer::draw_polygon(const Polygon& polygon,
       glm::rotate(model_to_world, rotation, glm::vec3{0.0f, 0.0f, 1.0f});
   model_to_world =
       glm::translate(model_to_world, glm::vec3{pos.x, pos.y, 0.0f});
+  model_to_world =
+      glm::rotate(model_to_world, static_cast<float>(polygon.rotation()),
+                  glm::vec3{0.0f, 0.0f, 1.0f});
   model_to_world =
       glm::scale(model_to_world, glm::vec3{extent.x, extent.y, 1.0f});
 
