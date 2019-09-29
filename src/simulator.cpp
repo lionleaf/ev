@@ -16,7 +16,7 @@ WalkingChallenge::WalkingChallenge(CreatureDNA creatureDNA,
 
 bool WalkingChallenge::step(float dt) {
   if (m_num_iterations < m_iterations_to_complete) {
-    m_creature.update(dt);
+    m_creature.step(dt);
     m_world.step(dt);
     ++m_num_iterations;
   }

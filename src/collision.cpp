@@ -266,7 +266,7 @@ bool AABB_vs_circle(AABB aabb, Circle circle, CollisionData& collision_data) {
   Vec2 pos_aabb = collision_data.body_a.m_pos + aabb.min +
                   aabb_extent;  // Center of aabb in world space
   Vec2 pos_circle = collision_data.body_b.m_pos +
-                    circle.pos;  // Center of circle in world space
+                    circle.m_pos;  // Center of circle in world space
   auto aabb_to_circle = pos_circle - pos_aabb;
 
   // Compute closest point on the AABB to the circle
@@ -374,9 +374,9 @@ bool circle_vs_circle(Circle circle_a,
                       Circle circle_b,
                       CollisionData& collision_data) {
   Vec2 a_pos =
-      collision_data.body_a.m_pos + circle_a.pos;  // Positions are additive
+      collision_data.body_a.m_pos + circle_a.m_pos;  // Positions are additive
   Vec2 b_pos =
-      collision_data.body_b.m_pos + circle_b.pos;  // Positions are additive
+      collision_data.body_b.m_pos + circle_b.m_pos;  // Positions are additive
 
   // Test intersection
   real combined_r = circle_a.radius + circle_b.radius;
@@ -411,10 +411,10 @@ void resolve_collision(CollisionData& collision_data) {
   // around we want the math to be based on the same position for
   // both contact points.
   Vec2 a_pos = A.m_pos;
-  Vec2 a_vel = A.m_velocity;
+  Vec2 a_vel = A.m_velocity + collision_data.shape_a.m_velocity;
   real a_ang_vel = A.m_angular_velocity;
   Vec2 b_pos = B.m_pos;
-  Vec2 b_vel = B.m_velocity;
+  Vec2 b_vel = B.m_velocity + collision_data.shape_a.m_velocity;
   real b_ang_vel = B.m_angular_velocity;
 
   for (int i = 0; i < collision_data.contact_count; ++i) {
@@ -470,8 +470,8 @@ void resolve_collision(CollisionData& collision_data) {
 
     // skip tiny friction impulses
     if (abs(friction_impulse_mag) > 0.0000001f) {
-      real static_friction = 0.7f;   // TODO: Should be material property
-      real dynamic_friction = 0.5f;  // TODO: Should be material property
+      real static_friction = 0.8f;   // TODO: Should be material property
+      real dynamic_friction = 0.7f;  // TODO: Should be material property
 
       Vec2 friction_impulse{};
 

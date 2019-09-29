@@ -42,9 +42,10 @@ class Body {
   void inline apply_impulse(Vec2 impulse, Vec2 contact_vector) {
     m_velocity += m_mass_inv * impulse;
     m_angular_velocity +=
-        m_moment_of_inertia_inv * cross_product(contact_vector, impulse);
+        m_angular_mass_inv * cross_product(contact_vector, impulse);
   }
 
+  void step(real dt);
   void compute_mass();
   real inline mass() { return m_mass; }
   real inline mass_inv() { return m_mass_inv; }
@@ -57,22 +58,22 @@ class Body {
     }
   }
 
-  real inline angular_mass() { return m_moment_of_inertia; }
-  real inline angular_mass_inv() { return m_moment_of_inertia_inv; }
+  real inline angular_mass() { return m_angular_mass; }
+  real inline angular_mass_inv() { return m_angular_mass_inv; }
   void inline set_angular_mass(real mass) {
-    m_moment_of_inertia = mass;
+    m_angular_mass = mass;
     if (abs(mass) > 0.00001f) {
-      m_moment_of_inertia_inv = 1.0f / mass;
+      m_angular_mass_inv = 1.0f / mass;
     } else {
-      m_moment_of_inertia_inv = 0.0f;
+      m_angular_mass_inv = 0.0f;
     }
   }
 
  private:
   real m_mass{0.0f};
   real m_mass_inv{0.0f};
-  real m_moment_of_inertia{0.0f};
-  real m_moment_of_inertia_inv{0.0f};
+  real m_angular_mass{0.0f};
+  real m_angular_mass_inv{0.0f};
 };
 
 struct CreatureDNA {
@@ -90,7 +91,7 @@ class Creature {
   Creature();
   Creature(const CreatureDNA& dna);
   void reset(){};
-  void update(real dt);
+  void step(real dt);
   float m_phase[4];
   float m_amplitudes[4];
   float m_freqs[4];

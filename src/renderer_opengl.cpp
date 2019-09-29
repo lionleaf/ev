@@ -254,8 +254,8 @@ void OpenGLRenderer::draw_circle(Circle circle, Vec2 body_pos, float rotation) {
       glm::translate(model_to_world, glm::vec3{body_pos.x, body_pos.y, 0.0f});
   model_to_world =
       glm::rotate(model_to_world, rotation, glm::vec3{0.0f, 0.0f, 1.0f});
-  model_to_world = glm::translate(model_to_world,
-                                  glm::vec3{circle.pos.x, circle.pos.y, 0.0f});
+  model_to_world = glm::translate(
+      model_to_world, glm::vec3{circle.m_pos.x, circle.m_pos.y, 0.0f});
   model_to_world =
       glm::scale(model_to_world, glm::vec3{circle.radius, circle.radius, 1.0f});
 

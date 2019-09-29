@@ -33,15 +33,8 @@ void World::reset() {
 }
 
 void World::step(float dt) {
-  Vec2 gravity{0.0f, -9.0f};
   for (Body* obj : m_objects) {
-    if (obj->mass() == 0.0f) {
-      continue;  // inf mass
-    }
-    obj->m_pos += obj->m_velocity * dt;
-    obj->m_orientation += obj->m_angular_velocity * dt;
-    obj->m_velocity += gravity * dt;
-    obj->m_angular_velocity += obj->m_torque * obj->angular_mass_inv() * dt;
+    obj->step(dt);
   }
   std::vector<CollisionData> collisions{};
 
@@ -50,36 +43,36 @@ void World::step(float dt) {
     for (unsigned int j = i + 1; j < m_objects.size(); j++) {
       Body* obj_b = m_objects.at(j);
 
-      for (Circle circle_a : obj_a->m_circles) {
-        for (Circle circle_b : obj_b->m_circles) {
-          CollisionData collision_data{*obj_a, *obj_b};
+      for (Circle& circle_a : obj_a->m_circles) {
+        for (Circle& circle_b : obj_b->m_circles) {
+          CollisionData collision_data{*obj_a, *obj_b, circle_a, circle_b};
           if (circle_vs_circle(circle_a, circle_b, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
       }
 
-      for (Polygon poly_a : obj_a->m_polygons) {
-        for (Polygon poly_b : obj_b->m_polygons) {
-          CollisionData collision_data{*obj_a, *obj_b};
+      for (Polygon& poly_a : obj_a->m_polygons) {
+        for (Polygon& poly_b : obj_b->m_polygons) {
+          CollisionData collision_data{*obj_a, *obj_b, poly_a, poly_b};
           if (polygon_vs_polygon(poly_a, poly_b, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
       }
 
-      for (Polygon polygon : obj_a->m_polygons) {
-        for (Circle circle : obj_b->m_circles) {
-          CollisionData collision_data{*obj_a, *obj_b};
+      for (Polygon& polygon : obj_a->m_polygons) {
+        for (Circle& circle : obj_b->m_circles) {
+          CollisionData collision_data{*obj_a, *obj_b, polygon, circle};
           if (polygon_vs_circle(polygon, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }
         }
       }
 
-      for (Circle circle : obj_a->m_circles) {
-        for (Polygon polygon : obj_b->m_polygons) {
-          CollisionData collision_data{*obj_b, *obj_a};
+      for (Circle& circle : obj_a->m_circles) {
+        for (Polygon& polygon : obj_b->m_polygons) {
+          CollisionData collision_data{*obj_b, *obj_a, circle, polygon};
           if (polygon_vs_circle(polygon, circle, collision_data)) {
             collisions.push_back(std::move(collision_data));
           }

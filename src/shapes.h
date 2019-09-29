@@ -8,7 +8,13 @@ using std::tuple;
 
 class Body;
 
-class Polygon {
+class Shape {
+ public:
+  Vec2 m_pos{};
+  Vec2 m_velocity{};
+};
+
+class Polygon : public Shape {
  private:
   real m_rotation{};
 
@@ -26,16 +32,14 @@ class Polygon {
 
   std::vector<Vec2> m_vertices{};
   std::vector<Vec2> m_normals{};
-  Vec2 m_pos{};
 
   // Returns {mass, angular_mass} tuple
   tuple<real, real> compute_mass(real density);
 };
 
-class Circle {
+class Circle : public Shape {
  public:
   real radius;
-  Vec2 pos;
   real compute_mass(real density);
   real compute_angular_mass(real mass);
 };

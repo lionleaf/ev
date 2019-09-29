@@ -8,6 +8,8 @@ namespace phys {
 struct CollisionData {
   Body& body_a;
   Body& body_b;
+  Shape& shape_a;
+  Shape& shape_b;
   Vec2 normal{};
   real penetration_depth{};
   Vec2 contacts[2]{};  // Only convex polygon and m_circles, so max 2 contact

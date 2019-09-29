@@ -6,7 +6,7 @@ namespace ev {
 class WalkingChallenge {
  public:
   WalkingChallenge(CreatureDNA creatureDNA,
-                   int seconds = 10,
+                   int seconds = 15,
                    int nr_bodies = 0);
   // Returns true if challenge is done
   bool step(float dt);

@@ -30,10 +30,13 @@ void Ev::main_loop() {
 
   int simulated_creatures = 0;
 
+  CreatureDNA best_dna{};
+
   auto challenge = WalkingChallenge{generation.dna[simulated_creatures]};
   std::vector<std::shared_ptr<WalkingChallenge>> visible_challenges{};
   for (CreatureDNA dna : generation.dna) {
     visible_challenges.push_back(std::make_shared<WalkingChallenge>(dna));
+    break;
   }
 
   Camera camera{};
@@ -49,6 +52,7 @@ void Ev::main_loop() {
 
       ++simulated_creatures;
       if (simulated_creatures >= population_count) {
+        best_dna = generation.dna[max_element_index(fitness)];
         generation = m_evolutor.breed_next_generation(generation, fitness,
                                                       population_count);
         simulated_creatures = 0;
@@ -82,8 +86,12 @@ void Ev::main_loop() {
       }
 
       for (uint32 i = 0; i < visible_challenges.size(); ++i) {
-        if (visible_challenges[i]->step(simulation_dt)) {
-          visible_challenges[i]->reset(generation.dna[i]);
+        if (visible_challenges[i]->step(simulation_dt) ||
+            visible_challenges[i]->step(
+                simulation_dt)) {  // Rendering 30fps simulation at 60fps, so
+                                   // double-step
+          // visible_challenges[i]->reset(generation.dna[i]);
+          visible_challenges[i]->reset(best_dna);
         }
       }
     }
