@@ -13,6 +13,7 @@ add_executable(ev
     src/simulator.cpp src/simulator.h
     src/physics_2d.cpp src/physics_2d.h
     src/shapes.cpp src/shapes.h
+    src/creatures/rolling_wheel.cpp src/creatures/rolling_wheel.h
     src/collision.cpp src/collision.h
     src/evolution.cpp src/evolution.h
     src/renderer_opengl.cpp src/renderer_opengl.h

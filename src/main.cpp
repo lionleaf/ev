@@ -2,7 +2,9 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include "creatures/rolling_wheel.h"
 #include "ev.h"
+#include "simulator.h"
 
 //#include <float.h>
 // unsigned int fp_control_state = _controlfp(_EM_INEXACT, _MCW_EM);
@@ -10,7 +12,8 @@
 int main() {
   // TODO:  move this somewhere else
 
-  auto ev = ev::Ev{};
+  using namespace ev;
+  auto ev = Ev<WalkingChallenge<RollingWheelCreature>>{};
 
   ev.main_loop();
 

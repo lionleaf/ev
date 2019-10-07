@@ -86,23 +86,4 @@ struct Generation {
   std::vector<CreatureDNA> dna{};
 };
 
-class Creature {
- public:
-  Creature();
-  Creature(const CreatureDNA& dna);
-  void reset(){};
-  void step(real dt);
-
-  static const int m_legs = 8;
-  float m_phase[m_legs];
-  float m_amplitudes[m_legs];
-  float m_freqs[m_legs];
-
-  Body& body() { return m_body; };
-
- private:
-  Body m_body{};
-  real m_time{0};
-};
-
 }  // namespace ev

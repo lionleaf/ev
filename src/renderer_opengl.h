@@ -19,7 +19,6 @@ class OpenGLRenderer {
   ~OpenGLRenderer();
   void start_frame();
   void end_frame();
-  void draw_creature(Creature& creature);
   void draw_body(const Body& body);
   void draw_circle(Circle circle, Vec2 offset, float rotation);
   void draw_polygon(const Polygon& polygon, Vec2 offset, float rotation);

@@ -105,11 +105,11 @@ void OpenGLRenderer::start_frame() {
 }
 
 void OpenGLRenderer::scroll_callback(GLFWwindow* window, float offset) {
-  m_camera.pos.z -= abs(m_camera.pos.z) / 10.0 * offset;
+  m_camera.pos.z -= static_cast<float>(abs(m_camera.pos.z) / 10.0 * offset);
 }
 
 void OpenGLRenderer::poll_camera_input() {
-  real speed = 3.0f;
+  float speed = 3.0f;
   if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) {
     m_camera.pos.y += speed;
     m_camera.look_at.y += speed;
@@ -315,17 +315,13 @@ void OpenGLRenderer::draw_circle(Circle circle, Vec2 body_pos, float rotation) {
   GL(glUseProgram(0));
 }*/
 
-void OpenGLRenderer::draw_creature(Creature& creature) {
-  draw_body(creature.body());
-}
-
 void OpenGLRenderer::draw_body(const Body& body) {
   for (Polygon polygon : body.m_polygons) {
-    draw_polygon(polygon, body.m_pos, body.m_orientation);
+    draw_polygon(polygon, body.m_pos, static_cast<float>(body.m_orientation));
   }
 
   for (const Circle circle : body.m_circles) {
-    draw_circle(circle, body.m_pos, body.m_orientation);
+    draw_circle(circle, body.m_pos, static_cast<float>(body.m_orientation));
   }
 }
 }  // namespace ev

@@ -23,7 +23,6 @@ GLuint LoadProgram(const char* vertex_path, const char* fragment_path) {
   const char* fragShaderSrc = fragShaderStr.c_str();
 
   GLint result = GL_FALSE;
-  int logLength;
 
   // Compile vertex shader
   std::cout << "Compiling vertex shader." << std::endl;
@@ -31,6 +30,8 @@ GLuint LoadProgram(const char* vertex_path, const char* fragment_path) {
   glCompileShader(vertShader);
 
 #ifdef GL_DEBUG
+  int logLength;
+
   // Check vertex shader
   glGetShaderiv(vertShader, GL_COMPILE_STATUS, &result);
 
