@@ -65,5 +65,16 @@ add_custom_command(
 # Add "Shaders" as a list of files in Visual Studio, XCode etc
 source_group("Shaders" FILES REGULAR_EXPRESSION "shaders/.*\.(vert|frag)")
 # Separate source list to make Visual Studio list .h and .cpp files together
-source_group("Source" FILES REGULAR_EXPRESSION "(src/.*\.(h|cpp))|(extern/imgui-1.69/.*\.(h|cpp))")
+source_group("extern" FILES REGULAR_EXPRESSION "(extern/imgui-1.69/.*\.(h|cpp))")
+# 
 
+# Make Visual Studio see the src/ directory structure
+# Taken from https://stackoverflow.com/questions/33808087/cmake-how-to-create-visual-studio-filters
+
+file(GLOB_RECURSE _source_list src/*.cpp* src/*.h*)
+foreach(_source IN ITEMS ${_source_list})
+    get_filename_component(_source_path "${_source}" PATH)
+    string(REPLACE "${CMAKE_SOURCE_DIR}" "" _group_path "${_source_path}")
+    string(REPLACE "/" "\\" _group_path "${_group_path}")
+    source_group("${_group_path}" FILES "${_source}")
+endforeach()
