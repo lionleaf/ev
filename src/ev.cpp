@@ -36,13 +36,13 @@ void Ev::main_loop() {
   std::vector<std::shared_ptr<WalkingChallenge>> visible_challenges{};
   for (CreatureDNA dna : generation.dna) {
     visible_challenges.push_back(std::make_shared<WalkingChallenge>(dna));
-    break;
   }
 
   Camera camera{};
   camera.pos = glm::vec3{0, 0, 50};  // Look down -Z axis.
   camera.look_at = glm::vec3{0, 0, 0};
   camera.up = glm::vec3{0, 1, 0};
+  bool show_best = true;
 
   Creature* visible_creature{};
   while (!m_renderer.should_close()) {
@@ -73,9 +73,13 @@ void Ev::main_loop() {
       m_renderer.start_frame();
 
       ev_ui::generation_info(generation.generation_nr, simulated_creatures,
-                             m_evolutor.get_max_fitness_plot());
-      for (auto& chal : visible_challenges) {
-        render_world(chal->getWorld());
+                             m_evolutor.get_max_fitness_plot(), show_best);
+      if (show_best) {
+        render_world(visible_challenges[0]->getWorld());
+      } else {
+        for (auto& chal : visible_challenges) {
+          render_world(chal->getWorld());
+        }
       }
       m_renderer.end_frame();
 
@@ -90,8 +94,11 @@ void Ev::main_loop() {
             visible_challenges[i]->step(
                 simulation_dt)) {  // Rendering 30fps simulation at 60fps, so
                                    // double-step
-          // visible_challenges[i]->reset(generation.dna[i]);
-          visible_challenges[i]->reset(best_dna);
+          visible_challenges[i]->reset(generation.dna[i]);
+          if (show_best) {
+            visible_challenges[i]->reset(best_dna);
+            break;
+          }
         }
       }
     }

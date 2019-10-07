@@ -21,7 +21,10 @@ void main_ui();
 
 void camera_control(Vec2& pos);
 
-void generation_info(int nr, int creature_nr, std::vector<float> fitness);
+void generation_info(int nr,
+                     int creature_nr,
+                     std::vector<float> fitness,
+                     bool& show_best);
 
 // Called at the end of frame to draw and display the UI
 void draw();

@@ -77,7 +77,7 @@ class Body {
 };
 
 struct CreatureDNA {
-  constexpr static int dna_size{3 * 4};
+  constexpr static int dna_size{6 * 8};
   real raw_dna[dna_size];
 };
 
@@ -92,9 +92,11 @@ class Creature {
   Creature(const CreatureDNA& dna);
   void reset(){};
   void step(real dt);
-  float m_phase[4];
-  float m_amplitudes[4];
-  float m_freqs[4];
+
+  static const int m_legs = 8;
+  float m_phase[m_legs];
+  float m_amplitudes[m_legs];
+  float m_freqs[m_legs];
 
   Body& body() { return m_body; };
 

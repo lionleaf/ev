@@ -12,12 +12,16 @@
 namespace ev {
 namespace ev_ui {
 
-void generation_info(int nr, int creature_nr, std::vector<float> fitness) {
+void generation_info(int nr,
+                     int creature_nr,
+                     std::vector<float> fitness,
+                     bool& show_best) {
   ImGui::Begin("Generation");
   ImGui::Text("Generation nr: %i, creature: %i", nr, creature_nr);
   ImGui::PlotLines("fitness", fitness.data(), fitness.size());
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  ImGui::Checkbox("Show best", &show_best);
   ImGui::End();
 }
 

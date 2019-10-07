@@ -50,7 +50,7 @@ Generation Evolutor::breed_next_generation(const Generation generation,
       // Randomly pick dna from parent
       kid.raw_dna[dna_i] = rand() % 2 ? mom.raw_dna[dna_i] : dad.raw_dna[dna_i];
 
-      if ((rand() % 100) <= 1) {
+      if ((rand() % 100) <= 5) {
         // Mutation!
         kid.raw_dna[dna_i] +=
             static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
