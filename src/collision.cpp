@@ -111,6 +111,7 @@ uint32 clip(Vec2 n, real c, Vec2* face) {
   // If the points are on different sides of the plane
   if (d1 * d2 < 0.0f)  // less than to ignore -0.0f
   {
+    assert(clipped < 2);
     // Push interesection point
     real alpha = d1 / (d1 - d2);
     out[clipped] = face[0] + alpha * (face[1] - face[0]);
