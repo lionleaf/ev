@@ -1,3 +1,4 @@
+#include <array>
 #include "../common.h"
 
 namespace ev {
@@ -8,10 +9,10 @@ class RollingWheelCreature {
 
   void step(real dt);
 
-  static const int m_legs = 8;
-  real m_phase[m_legs];
-  real m_amplitudes[m_legs];
-  real m_freqs[m_legs];
+  static constexpr int m_legs = 8;
+  std::array<real, m_legs> m_phase{0};
+  std::array<real, m_legs> m_amplitudes{0};
+  std::array<real, m_legs> m_freqs{0};
 
   Body& body() { return m_body; };
 

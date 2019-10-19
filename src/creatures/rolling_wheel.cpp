@@ -1,13 +1,13 @@
 #include "rolling_wheel.h"
 namespace ev {
-RollingWheelCreature::RollingWheelCreature() {
+RollingWheelCreature::RollingWheelCreature()
+    : m_amplitudes{}, m_freqs{}, m_phase{} {
   for (int i = 0; i < m_legs; ++i) {
-    m_body.add_polygon(Polygon{5.5f, 0.5f, i * 0.785398f});
+    m_body.add_polygon(Polygon{5.5f, 0.5f, i * 0.785398});
   }
   m_body.m_angular_velocity = 0.00f;
   m_body.m_orientation = 0.0;
   m_body.restitution = 0.2f;
-  m_time = 0.0f;
   m_body.m_pos.y = 5.0f;
 }
 
